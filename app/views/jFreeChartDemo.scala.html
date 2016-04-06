@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+<h1>JFreeChart Demo</h1>
+A Demo to render a dynamically generated JFreeChart.
+The source code of this demo is
+
+target="_blank">here</a>.
+
+<br/><br/>
+
+@helper.form(action = routes.JFreeChartDemo.chart) {
+<label>Email Id
+    <input type="email" name="email" tabindex="1" required="required">
+</label>
+
+<label>Password
+    <input type="password" name="password" tabindex="2" required="required">
+</label>
+
+<input type="submit" value="Register" type="button">
+}
+
+<img src="@routes.JFreeChartDemo.chart"/>
+
+</body>
+
+
+</html>

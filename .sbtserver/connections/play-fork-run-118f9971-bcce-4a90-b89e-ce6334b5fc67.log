@@ -1,0 +1,9 @@
+New log file opened at Tue Apr 05 15:11:15 CDT 2016 by 9632@danielhomelocal.local
+Sending msg to client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67: DetachedLogEvent(LogMessage(debug,sbt client logs are in: /Users/yair/Dev/Play Framework/play-scala-intro/.sbtserver/connections/play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67.log))
+Sending msg to client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67: DetachedLogEvent(LogMessage(debug,sbt server socket logs are in: /Users/yair/Dev/Play Framework/play-scala-intro/.sbtserver/connections/master.log))
+Reading next message from client.
+Sending msg to client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67: DetachedLogEvent(LogMessage(debug,sbt general server logs are in: /Users/yair/Dev/Play Framework/play-scala-intro/.sbtserver/master.log))
+Client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67 EOF, shutting down.
+Stopping client.
+Dropping message (0,ReceivedResponse()) to dead client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67
+Client play-fork-run-118f9971-bcce-4a90-b89e-ce6334b5fc67 thread exiting.
