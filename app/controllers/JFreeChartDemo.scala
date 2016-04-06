@@ -26,10 +26,13 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
       Ok(views.html.jFreeChartDemo())
   }
 
-  def chart = Action {
+  def chart = Action { request=>
+    println("REQUEST: " + request.queryString.map { case (k,v) => k -> v.mkString })
+    val params = request.queryString.map { case (k,v) => k -> v.mkString }
+    val familia: String = params.get("familia").get
     val MimeType = "image/png"
     try {
-      val imageData = generateBarChart()
+      val imageData = generateBarChart(familia)
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>
@@ -71,8 +74,9 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
   }
 
 
-  private def generateBarChart():Array[Byte] = {
+  private def generateBarChart(familia: String):Array[Byte] = {
 
+    println("FAMILIA: " + familia)
     val values = new DefaultCategoryDataset()
 
     var width = 0
@@ -82,7 +86,7 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
 
       val statement = connection.createStatement();
       statement.execute("DROP TABLE IF EXISTS mytable")
-      statement.execute( """SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) AS cantidad
+      statement.execute( s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) AS cantidad
                              INTO TEMP mytable
                                FROM product, invoice_item, invoice
                                WHERE 1 = 1
@@ -93,14 +97,14 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
                                  AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
                                  AND invoice.invoice_date >= '2016-01-01'
                                  AND invoice.invoice_date <=  '2016-01-30'
-                                 AND product.primary_product_category_id = 'ILT-142'
+                                 AND product.primary_product_category_id = '${familia}'
                                GROUP BY 1, 2
                                ORDER BY 1,2;""")
 
-      val resultSet = statement.executeQuery( """SELECT product.product_id, coalesce( mytable.cantidad, 0) as venta
+      val resultSet = statement.executeQuery( s"""SELECT product.product_id, coalesce( mytable.cantidad, 0) as venta
                                                   FROM product left outer join mytable on product.product_id = mytable.product_id
                                                   WHERE  1=1
-                                                    AND product.primary_product_category_id = 'ILT-142'
+                                                    AND product.primary_product_category_id = '${familia}'
                                                   ORDER BY 2 DESC LIMIT 20;""");
 
       while (resultSet.next()) {
