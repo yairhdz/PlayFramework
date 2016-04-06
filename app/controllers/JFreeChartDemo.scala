@@ -116,7 +116,7 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
     }
 
     val chart = ChartFactory.createBarChart(
-      "Top 20 Venta por Familia Enero 2016",
+      s"Top 20 Venta Familia ${familia} Enero 2016",
       "Productos",
       "Venta",
       values,

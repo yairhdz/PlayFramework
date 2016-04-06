@@ -1,24 +1,15 @@
-<!DOCTYPE html>
-<html>
 
-<body>
-<h1>JFreeChart Demo</h1>
-A Demo to render a dynamically generated JFreeChart.
-The source code of this demo is
+@main("CRBI"){
+    <h1>CRBI Demo</h1>
+        Demo para mostrar reportes con graficas
+    <br/><br/>
 
-target="_blank">here</a>.
+    @helper.form(action = routes.JFreeChartDemo.chart) {
+        <label>Familia
+            <input type="text" name="familia" tabindex="1" required="true">
+        </label>
 
-<br/><br/>
-
-@helper.form(action = routes.JFreeChartDemo.chart) {
-<label>Familia
-    <input type="text" name="familia" tabindex="1" required="required">
-</label>
-
-<input type="submit" value="Graficar" type="button">
+        <input type="submit" value="Graficar" type="button">
+    }
 }
 
-</body>
-
-
-</html>

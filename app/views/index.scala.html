@@ -18,21 +18,8 @@
     @*@play20.welcome(message, style = "Scala")*@
     <ul>
         <li>@message</li>
-        <li>HOLA</li>
-        <li><a href="/jFreeChartDemo/show">Visit our HTML tutorial</a></li>
+        <li>List</li>
+        <li><a href="/jFreeChartDemo/show">Top 20 Venta por Familia</a></li>
     </ul>
 
-    @helper.form(action = routes.JFreeChartDemo.chart) {
-<label>Email Id
-    <input type="email" name="email" tabindex="1" required="required">
-</label>
-
-<label>Password
-    <input type="password" name="password" tabindex="2" required="required">
-</label>
-
-<input type="submit" value="Register" type="button">
-}
-
-<!-- <img src="@routes.JFreeChartDemo.chart"/> -->
 }
