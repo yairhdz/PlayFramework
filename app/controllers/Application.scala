@@ -12,6 +12,8 @@ import scala.collection.mutable
 class Application @Inject()(db: Database) extends Controller {
 
   def index = Action {
+    val level = "1"
+    val list = Seq("uno", "dos", "tres")
     println("INDEX")
 
     val prods = new mutable.HashMap[String, String]
@@ -30,7 +32,7 @@ class Application @Inject()(db: Database) extends Controller {
         prods.put(productId, productDescription)
       }
     }
-    Ok(views.html.index(prods.toString()))
+    Ok(views.html.index("HOLA"))
   }
 
 }

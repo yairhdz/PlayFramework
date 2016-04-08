@@ -1,0 +1,41 @@
+@(title: String, Items: Map[String, Int], matriz: Array[Array[String]])
+	
+	@main("REPORTE"){
+        <h1>@title</h1>
+
+        <img src="@routes.JFreeChartDemo.getChart(title)">
+<!--
+        <ul id="lista" style="margin-left">
+            @Items.map { case (k,v) =>
+                <div id="header">
+                    @k
+                </div>
+
+                <input type="text" value="@v" size="5" disabled>
+
+                <br/>
+            }
+        </ul>
+-->
+
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                padding: 5px;
+            }
+            table {
+                border-spacing: 15px;
+            }
+        </style>
+
+
+        <table border="3" style="width:50%">
+        @matriz.map { item =>
+            <tr>
+                @item.map { value =>
+                    <td><div>@value</div></td>
+                }
+            </tr>
+        }
+        </table>
+	}

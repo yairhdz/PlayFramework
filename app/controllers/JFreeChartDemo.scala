@@ -1,19 +1,20 @@
 package controllers
 
-import java.io.ByteArrayOutputStream
-
-import org.jfree.chart._
-import org.jfree.chart.plot.{PiePlot3D, PlotOrientation}
-import org.jfree.data.DefaultKeyedValues
-import org.jfree.data.general.DefaultPieDataset
-import play.api.mvc._
 import java.awt.Color
-import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
+import org.jfree.chart._
 import org.jfree.chart.axis.CategoryLabelPositions
-import org.jfree.data.category.{CategoryDataset, DefaultCategoryDataset}
+import org.jfree.chart.plot.{PiePlot3D, PlotOrientation}
+import org.jfree.data.DefaultKeyedValues
+import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.data.general.DefaultPieDataset
 import play.api.db._
+import play.api.mvc._
+
+import scala.collection.immutable.ListMap
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * A Demo to render a dynamically generated chart.
@@ -29,10 +30,34 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
   def chart = Action { request=>
     println("REQUEST: " + request.queryString.map { case (k,v) => k -> v.mkString })
     val params = request.queryString.map { case (k,v) => k -> v.mkString }
+
     val familia: String = params.get("familia").get
+    val data = getData(familia)
+    val matriz = getMatrixData(familia)
+
+    // val data = Map("uno" -> "dos")
     val MimeType = "image/png"
     try {
-      val imageData = generateBarChart(familia)
+      val level = 1
+      val list = Seq("uno", "dos")
+      // val imageData = generateBarChart(familia)
+      Ok(views.html.reporte(familia, data, matriz))
+    } catch {
+      case e: Exception =>
+        BadRequest("Couldn’t generate chart. Error: " + e.getMessage)
+    }
+  }
+
+  def getChart(familia: String) = Action { request=>
+    // println("REQUEST: " + request.queryString.map { case (k,v) => k -> v.mkString })
+    // val params = request.queryString.map { case (k,v) => k -> v.mkString }
+    // val familia: String = params.get("familia").get
+    val MimeType = "image/png"
+    try {
+      // val level = 1
+      // val list = Seq("uno", "dos")
+      val data = getData(familia)
+      val imageData = generateBarChart(data)
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>
@@ -74,16 +99,56 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
   }
 
 
-  private def generateBarChart(familia: String):Array[Byte] = {
+  private def generateBarChart(data: Map[String, Int]):Array[Byte] = {
 
-    println("FAMILIA: " + familia)
     val values = new DefaultCategoryDataset()
 
     var width = 0
     val height = 400
 
-    db.withConnection { connection =>
+    var top = 0
+    data.foreach { case (k, v) =>
+      if (top < 20) {
+        val productId = k
+        val venta = v
+        values.addValue(venta, "", productId)
+        width += 50
+        top = top + 1
+      }
 
+    }
+
+    //   while (resultSet.next()) {
+    //     val productId = resultSet.getString("product_id")
+    //     val venta = resultSet.getInt("venta")
+    //     values.addValue(venta, "", productId)
+    //     width += 50
+    //   }
+    // }
+
+    val chart = ChartFactory.createBarChart(
+      s"Top 20 Venta Familia familia Enero 2016",
+      "Productos",
+      "Venta",
+      values,
+      PlotOrientation.VERTICAL,
+      false, false, false
+    )
+
+    val plot = chart.getCategoryPlot()
+    val axis = plot.getDomainAxis()
+    axis.setCategoryLabelPositions(CategoryLabelPositions.UP_90)
+
+    val image = chart.createBufferedImage(width, height);
+    val byteArray = new ByteArrayOutputStream();
+    ChartUtilities.writeBufferedImageAsPNG(byteArray, image);
+
+    return byteArray.toByteArray()
+  }
+
+  def getData(familia: String): Map[String, Int] = {
+    var data: Map[String, Int] = Map()
+    db.withConnection { connection =>
       val statement = connection.createStatement();
       statement.execute("DROP TABLE IF EXISTS mytable")
       statement.execute( s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) AS cantidad
@@ -105,34 +170,106 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
                                                   FROM product left outer join mytable on product.product_id = mytable.product_id
                                                   WHERE  1=1
                                                     AND product.primary_product_category_id = '${familia}'
-                                                  ORDER BY 2 DESC LIMIT 20;""");
+                                                  ORDER BY 2 DESC;""");
 
       while (resultSet.next()) {
         val productId = resultSet.getString("product_id")
         val venta = resultSet.getInt("venta")
-        values.addValue(venta, "", productId)
-        width += 50
+        data += productId -> venta
+      }
+    }
+    data = ListMap(data.toSeq.sortWith(_._2 > _._2):_*)
+
+    println(data)
+
+    return  data
+  }
+
+
+  def getMatrixData(familia: String): (Array[Array[String]]) = {
+    var matriz: Map[String, ArrayBuffer[String]] = Map()
+    val ejeX = new ArrayBuffer[String]()
+    val ejeY = new ArrayBuffer[String]()
+
+    var prods: Map[Int, String]= Map()
+    db.withConnection { connection =>
+      val statement = connection.createStatement
+      val resultSet = statement.executeQuery(s"SELECT * FROM i_l_t_atributos_matrix WHERE product_category_id = '${familia}'")
+
+      while(resultSet.next) {
+        println(resultSet.getString(1))
+        if (resultSet.getString(2) == "X") {
+          ejeX.insert(resultSet.getInt(4), resultSet.getString(3))
+        } else if (resultSet.getString(2) == "Y") {
+          ejeY.insert(resultSet.getInt(4), resultSet.getString(3))
+        }
+      }
+
+    }
+
+
+    db.withConnection { connection =>
+      val statement = connection.createStatement
+      val prod = statement.executeQuery(
+        s"""select product.product_id, product.posicion_matriz as pos,
+                                           to_char(coalesce( mytable.cantidad, 0), '999G999D') as venta
+                                           from product left outer join mytable on product.product_id = mytable.product_id
+                                           where 1=1
+                                           	and product.primary_product_category_id = '${familia}'
+                                           order by 2""")
+      while(prod.next()){
+        val pos = prod.getInt("pos")
+        val venta = prod.getString("venta")
+        prods +=  pos -> venta
+      }
+    }
+    prods = ListMap(prods.toSeq.sortBy(_._1):_*)
+
+    matriz += ("ejeX" -> ejeX)
+    matriz += "ejeY" -> ejeY
+
+    val numRenglones = ejeY.length
+    val numColumnas =   ejeX.length
+
+    var mat = Array.ofDim[String](numRenglones + 1, numColumnas + 1)
+
+    var i = 1
+    var j = 1
+    for(value <- ejeX){
+      mat(0)(i) = value
+      i = i + 1
+    }
+    for (valueY <- ejeY) {
+      mat(j)(0) = valueY
+      j = j + 1
+    }
+
+    var maxX = numColumnas
+
+    val maxSize = ejeX.length
+    var renglonb = 1
+
+    var newIdx = 1
+    prods.foreach { case (k, v) =>
+      if (renglonb <= numRenglones) {
+        if (k <= maxSize) {
+          mat(1)(k) = v
+        } else {
+          if (newIdx <= maxSize) {
+            mat(renglonb)(newIdx) = v
+          } else {
+            newIdx = 1
+            renglonb = renglonb + 1
+            mat(renglonb)(newIdx) = v
+          }
+        }
+        newIdx = newIdx + 1
       }
     }
 
-    val chart = ChartFactory.createBarChart(
-      s"Top 20 Venta Familia ${familia} Enero 2016",
-      "Productos",
-      "Venta",
-      values,
-      PlotOrientation.VERTICAL,
-      false, false, false
-    )
+    print(mat.map(_.mkString).mkString(" \n "))
 
-    val plot = chart.getCategoryPlot()
-    val axis = plot.getDomainAxis()
-    axis.setCategoryLabelPositions(CategoryLabelPositions.UP_90)
-
-    val image = chart.createBufferedImage(width, height);
-    val byteArray = new ByteArrayOutputStream();
-    ChartUtilities.writeBufferedImageAsPNG(byteArray, image);
-
-    return byteArray.toByteArray()
+    return mat
   }
 
 }
