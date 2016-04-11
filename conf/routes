@@ -4,8 +4,10 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.Application.index
+GET     /TODO                       controllers.Application.missing
 
-GET     /showVentas                 controllers.Venta.showVentaFamilias
+GET     /showMenuVentas             controllers.Venta.menuVentas
+GET     /ventas/periodo             controllers.Venta.ventasPeriodo
 GET     /venta/createChart          controllers.Venta.createChart
 GET     /showInventario             controllers.Application.showInventario
 

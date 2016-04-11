@@ -15,6 +15,8 @@ class Application @Inject()(db: Database) extends Controller {
     Ok(views.html.index("Index"))
   }
 
+  def missing = TODO
+
   def showInventario = TODO
 }
 

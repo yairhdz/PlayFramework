@@ -9,6 +9,7 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
 import play.api.db.Database
 import play.api.mvc._
+import play.twirl.api.TemplateMagic.anyToDefault
 
 import scala.collection.immutable.ListMap
 
@@ -17,10 +18,14 @@ import scala.collection.immutable.ListMap
   */
  class Venta @Inject()(db: Database) extends Controller {
 
-  def showVentaFamilias() = Action {
-    val data = getData()
-    Ok(views.html.ventas(data))
+  def menuVentas() = Action {
+    Ok(views.html.ventas.menuVentas())
    }
+
+  def ventasPeriodo = Action {
+    val data = getData()
+    Ok(views.html.ventas.ventasPeriodo(data))
+  }
 
   def getData(): Map[String, Int] = {
     var data: Map[String, Int] = Map()
