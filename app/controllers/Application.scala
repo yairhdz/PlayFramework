@@ -35,5 +35,7 @@ class Application @Inject()(db: Database) extends Controller {
     Ok(views.html.index("HOLA"))
   }
 
+  def showVentas = TODO
+  def showInventario = TODO
 }
 

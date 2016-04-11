@@ -5,6 +5,9 @@
 # An example controller showing a sample home page
 GET     /                           controllers.Application.index
 
+GET     /showVentas                 controllers.Application.showVentas
+GET     /showInventario             controllers.Application.showInventario
+
 GET    /jFreeChartDemo/show            controllers.JFreeChartDemo.show
 GET    /jFreeChartDemo/chart           controllers.JFreeChartDemo.chart
 GET    /jFreeChartDemo/getChart           controllers.JFreeChartDemo.getChart(familia)
