@@ -6,6 +6,7 @@
 GET     /                           controllers.Application.index
 
 GET     /showVentas                 controllers.Venta.showVentaFamilias
+GET     /venta/createChart          controllers.Venta.createChart
 GET     /showInventario             controllers.Application.showInventario
 
 GET    /jFreeChartDemo/show            controllers.JFreeChartDemo.show

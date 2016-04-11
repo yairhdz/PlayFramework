@@ -1,8 +1,18 @@
-@()
+@(data: Map[String, Int])
 
 @main("Ventas"){
     <ul>
         <li><a href="/jFreeChartDemo/show">Top 20 Venta por Familia</a></li>
     </ul>
+
+    <img src="@routes.Venta.createChart">
+
+    @data.map { case (k,v) =>
+        <form action="/">
+            <input type="submit" value="@k">
+            <input type="text" value="@v" disabled>
+        </form>
+
+    }
 }
 
