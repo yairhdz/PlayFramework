@@ -5,23 +5,14 @@
  * argument is a `String` with the title of the page, the second
  * argument is an `Html` object containing the body of the page.
  *@
-@main("Welcome to Play") {
+@main("BI Demo") {
 
     @*
      * Get an `Html` object by calling the built-in Play welcome
      * template and passing a `String` message.
      *@
     @*@play20.welcome(message, style = "Scala")*@
-    <ul>
-        <li>@message</li>
-        <li>List</li>
-        <li><a href="/jFreeChartDemo/show">Top 20 Venta por Familia</a></li>
-    </ul>
 
-    @*
-    * Pagina que mostrara el menu principal en la cual se mostrara por
-    * categorias los repportes que se podran generar dentro del sistem
-    *@
-
+    @message
 
 }

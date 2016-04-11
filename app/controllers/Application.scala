@@ -12,27 +12,7 @@ import scala.collection.mutable
 class Application @Inject()(db: Database) extends Controller {
 
   def index = Action {
-    val level = "1"
-    val list = Seq("uno", "dos", "tres")
-    println("INDEX")
-
-    val prods = new mutable.HashMap[String, String]
-
-    db.withConnection{ conn =>
-      val statement = conn.createStatement()
-      val query     = "select * from product limit 10"
-      val resultSet = statement.executeQuery(query)
-
-      while( resultSet.next() ) {
-        val productDescription = resultSet.getString("description")
-        val productId          = resultSet.getString("product_id")
-
-        println(productId)
-
-        prods.put(productId, productDescription)
-      }
-    }
-    Ok(views.html.index("HOLA"))
+    Ok(views.html.index("Index"))
   }
 
   def showVentas = TODO
