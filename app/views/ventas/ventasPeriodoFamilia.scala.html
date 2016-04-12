@@ -1,0 +1,29 @@
+@(familia: String, ventasPeriodoFamilia: Map[String, Int], matriz: Array[Array[String]])
+
+@main(s"Ventas ${familia}"){
+
+    <br/><br/>
+    <img src='@routes.Venta.createChart(Option(familia), s"Top 20 Ventas ${familia}", "Productos", "Venta")'>
+    <br/><br/>
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        table {
+            border-spacing: 15px;
+        }
+    </style>
+
+
+    <table border="3" style="width:50%">
+        @matriz.map { item =>
+        <tr>
+            @item.map { value =>
+            <td><div>@value</div></td>
+            }
+        </tr>
+        }
+    </table>
+}
