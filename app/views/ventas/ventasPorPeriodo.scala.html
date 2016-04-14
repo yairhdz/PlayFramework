@@ -1,0 +1,14 @@
+@(ventasPorPeriodo: Map[String, Int])
+
+VENTAS POR PERIODO
+
+    <img src='@routes.Venta.createChart(ventasPorPeriodo, "asd", "das", "dasds")'/>
+
+    @ventasPorPeriodo.map { case (k,v) =>
+    <form action="/TODO">
+        <input type="submit" value="@k">
+        <input type="text" value="@v" disabled>
+        <input type="text" name="familia" value="@k" hidden="false">
+    </form>
+    }
+

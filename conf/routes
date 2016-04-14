@@ -7,9 +7,14 @@ GET     /                           controllers.Application.index
 GET     /TODO                       controllers.Application.missing
 
 GET     /showMenuVentas             controllers.Venta.menuVentas
+
 GET     /ventas/periodo             controllers.Venta.ventasPeriodo
 GET     /ventas/periodoFamilia      controllers.Venta.ventasPeriodoFamilia
-GET     /venta/createChart          controllers.Venta.createChart(familia: Option[String], title, titleX, titleY)
+
+GET     /ventas/porPeriodoForm      controllers.Venta.ventasPorPeriodoForm
+GET     /ventas/porPeriodo          controllers.Venta.ventasPorPeriodo
+
+GET     /venta/createChart          controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario             controllers.Application.showInventario
 
 GET    /jFreeChartDemo/show            controllers.JFreeChartDemo.show

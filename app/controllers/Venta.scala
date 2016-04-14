@@ -36,6 +36,29 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.ventasPeriodoFamilia(familia, data, matriz))
   }
 
+  def ventasPorPeriodoForm = Action {
+    Ok(views.html.ventas.ventasPorPeriodoForm())
+  }
+  def ventasPorPeriodo = Action {
+    println("VENTAS POR PERIODO")
+    val dataDB = new Data(db)
+    val data = dataDB.getVentas("""select product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
+                                  	into temp ventas_por_periodo
+                                  	from product, invoice_item, invoice
+                                  	where 1 = 1
+                                      and invoice.invoice_id = invoice_item.invoice_id
+                                      and product.product_id = invoice_item.product_id
+                                      and invoice.invoice_type_id = 'SALES_INVOICE'
+                                      and invoice.invoice_fis <> 'HISTORICA'
+                                      and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+                                      and invoice.invoice_date >= '2016-01-01'
+                                      and invoice.invoice_date <=  '2016-01-30'
+                                  group by 1
+                                  order by 1,2;
+                                  """, "ventas_por_periodo")
+    Ok(views.html.ventas.ventasPorPeriodo(data))
+  }
+
   def getVentasPeriodo(): Map[String, Int] = {
     var data: Map[String, Int] = Map()
     db.withConnection{ connection =>
@@ -108,13 +131,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  def createChart(familia: Option[String], title: String, titleX: String, titleY: String) = Action { request =>
-    println("FAMILIA: " + familia)
-    val data = selectData(familia)
+  def createChart(data: Map[String, Int], title: String, titleX: String, titleY: String) = Action { request =>
+    val sortedData = ListMap(data.toList.sortWith(_._2 > _._2):_*)
     println("DATA: " + data.mkString)
+    println(data.map{case (k, v) => k + "=" + v}.mkString("&"))
     val MimeType = "image/png"
     try {
-      val imageData = generateBarChart(data, title, titleX, titleY)
+      val imageData = generateBarChart(sortedData, title, titleX, titleY)
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>

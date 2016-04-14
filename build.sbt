@@ -14,5 +14,6 @@ libraryDependencies ++= Seq(
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+routesImport += "binders.Binders._"
 
 fork in run := true
