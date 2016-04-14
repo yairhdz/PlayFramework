@@ -1,14 +1,16 @@
-@(ventasPorPeriodo: Map[String, Int])
+@(ventasPorPeriodo: Map[String, Int], periodoInicio: String, periodoFin: String)
 
 VENTAS POR PERIODO
 
     <img src='@routes.Venta.createChart(ventasPorPeriodo, "asd", "das", "dasds")'/>
 
     @ventasPorPeriodo.map { case (k,v) =>
-    <form action="/TODO">
+    <form action="/ventas/porPeriodoFamilia">
         <input type="submit" value="@k">
         <input type="text" value="@v" disabled>
-        <input type="text" name="familia" value="@k" hidden="false">
+        <input type="text" name="familia" value="@k" hidden>
+        <input type="date" name="inicio" value="@periodoFin" hidden>
+        <input type="date" name="inicio" value="@periodoFin" hidden>
     </form>
     }
 

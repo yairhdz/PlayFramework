@@ -39,10 +39,15 @@ import scala.collection.mutable.ArrayBuffer
   def ventasPorPeriodoForm = Action {
     Ok(views.html.ventas.ventasPorPeriodoForm())
   }
-  def ventasPorPeriodo = Action {
-    println("VENTAS POR PERIODO")
+
+  def ventasPorPeriodo = Action { request =>
+    val params = request.queryString.map { case(k,v) => k -> v.mkString}
+    val periodoInicio = params.get("inicio").getOrElse("")
+    val periodoFin    = params.get("fin").getOrElse("")
     val dataDB = new Data(db)
-    val data = dataDB.getVentas("""select product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
+    try {
+      val data = dataDB.getVentas(
+        s"""select product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
                                   	into temp ventas_por_periodo
                                   	from product, invoice_item, invoice
                                   	where 1 = 1
@@ -51,12 +56,24 @@ import scala.collection.mutable.ArrayBuffer
                                       and invoice.invoice_type_id = 'SALES_INVOICE'
                                       and invoice.invoice_fis <> 'HISTORICA'
                                       and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-                                      and invoice.invoice_date >= '2016-01-01'
-                                      and invoice.invoice_date <=  '2016-01-30'
+                                      and invoice.invoice_date >= '${periodoInicio}'
+                                      and invoice.invoice_date <=  '${periodoFin}'
                                   group by 1
                                   order by 1,2;
                                   """, "ventas_por_periodo")
-    Ok(views.html.ventas.ventasPorPeriodo(data))
+      Ok(views.html.ventas.ventasPorPeriodo(data, periodoInicio, periodoFin))
+    } catch {
+      case e: Exception =>
+        BadRequest("No se pudo generar la consulta, " + e.getMessage)
+    }
+
+  }
+
+  def ventasPorPeriodoFamilia = Action { request =>
+    val params = request.queryString.map { case(k,v) => k -> v.mkString}
+    println(params)
+
+    Ok(views.html.ventas.ventasPorPeriodoFamilia())
   }
 
   def getVentasPeriodo(): Map[String, Int] = {
