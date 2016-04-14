@@ -154,7 +154,8 @@ import scala.collection.mutable.ArrayBuffer
     println(data.map{case (k, v) => k + "=" + v}.mkString("&"))
     val MimeType = "image/png"
     try {
-      val imageData = generateBarChart(sortedData, title, titleX, titleY)
+      val chart = new JFreeChart()
+      val imageData = chart.generateBarChart(sortedData, title, titleX, titleY)
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>
@@ -162,46 +163,7 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  def generateBarChart(data: Map[String, Int], title: String, titleX: String, titleY: String): Array[Byte] = {
-    val values = new DefaultCategoryDataset()
 
-    var width = 0
-    val height = 400
-    var top = 0
-
-    data.foreach { case (k, v) =>
-      if (top < 20) {
-        val productId = k
-        val venta = v
-        values.addValue(venta, "", productId)
-        width += 50
-        top += 1
-      }
-    }
-
-    if (data.size < 5) {
-      width = 300
-    }
-
-    val chart = ChartFactory.createBarChart(
-      title,
-      titleX,
-      titleY,
-      values,
-      PlotOrientation.VERTICAL,
-      false, false, false
-    )
-
-    val plot = chart.getCategoryPlot()
-    val axis = plot.getDomainAxis()
-    axis.setCategoryLabelPositions(CategoryLabelPositions.UP_90)
-
-    val image = chart.createBufferedImage(width, height);
-    val byteArray = new ByteArrayOutputStream();
-    ChartUtilities.writeBufferedImageAsPNG(byteArray, image);
-
-    return byteArray.toByteArray()
-  }
 
   def getMatrixData(familia: String): (Array[Array[String]]) = {
     val ejeX = new ArrayBuffer[String]()
