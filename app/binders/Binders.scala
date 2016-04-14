@@ -18,23 +18,20 @@ object Binders {
       val pattern = new Regex("[a-z]")
       params.foreach{ case (k,v) =>
         val patternMatch = pattern.findFirstIn(v(0))
-        //println("PATTERN: " + patternMatch)
         patternMatch match {
           case None => bindMap += k -> v(0).toInt
           case Some(s) => "No debe estar en los params, son los titulos de la gráfica"
         }
       }
-      //println("GEN MAP: " + bindMap)
 
       if (bindMap.size > 0) {
         Some(Right(bindMap))
       } else {
-        return Some(Left("No se ha proporcionado el parametro"))
+        Some(Left("No se ha proporcionado el parametro"))
       }
     }
 
     override def unbind(key: String, value: Map[String, Int]): String = {
-      print("PARAMS: " + value.map{case (k, v) => k + "=" + v}.mkString("&"))
       value.map{case (k, v) => k + "=" + v}.mkString("&")
     }
   }
