@@ -34,13 +34,13 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.ventasPorPeriodoForm())
   }
 
-  def ventasPorPeriodo = Action { request =>
+  def ventasPorPeriodo(tempTable: String) = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val periodoInicio = params.get("inicio").getOrElse("")
     val periodoFin    = params.get("fin").getOrElse("")
     try {
       val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-        INTO TEMP ventas_por_periodo
+        INTO TEMP ${tempTable}
         FROM product, invoice_item, invoice
         where 1 = 1
           AND invoice.invoice_id = invoice_item.invoice_id
@@ -52,7 +52,7 @@ import scala.collection.mutable.ArrayBuffer
           AND invoice.invoice_date <=  '${periodoFin}'
         GROUP BY 1
         ORDER BY 1,2;
-        """, "SELECT * FROM ventas_por_periodo", "ventas_por_periodo")
+        """, s"SELECT * FROM ${tempTable}", tempTable)
       Ok(views.html.ventas.ventasPorPeriodo(data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>

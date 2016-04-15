@@ -20,7 +20,7 @@ if (datefield.type!="date"){ //if browser doesn't support input type="date", ini
 </script>
 
 <br/><br/>
-<form action="@routes.Venta.ventasPorPeriodo">
+<form action='@routes.Venta.ventasPorPeriodo("ventas_por_periodo")'>
     <table>
         <tr>
             <td><label>Inicio:</label></td>
@@ -32,6 +32,7 @@ if (datefield.type!="date"){ //if browser doesn't support input type="date", ini
         </tr>
     </table>
     <br/>
+    <input type="text" name="tempTable" value="ventas_por_periodo" type="text" hidden>
     <input type="submit" value="Graficar" type="button" formtarget="myiframe">
     <iframe name="myiframe" frameborder="0" width="100%" marginheight="20px" height="100%"></iframe>
 </form>
