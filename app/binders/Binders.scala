@@ -15,9 +15,11 @@ object Binders {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Map[String, Int]]] = {
       var bindMap: Map[String, Int] = Map()
 
-      val pattern = new Regex("[a-z]")
+      val pattern = new Regex("[A-Z]+|[a-z]+|/")
+
       params.foreach{ case (k,v) =>
         val patternMatch = pattern.findFirstIn(v(0))
+        //println("PATTERN: " + patternMatch)
         patternMatch match {
           case None => bindMap += k -> v(0).toInt
           case Some(s) => "No debe estar en los params, son los titulos de la gráfica"

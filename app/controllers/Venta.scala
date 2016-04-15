@@ -1,15 +1,9 @@
 package controllers
 
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-import org.jfree.chart.{ChartFactory, ChartUtilities}
-import org.jfree.chart.axis.CategoryLabelPositions
-import org.jfree.chart.plot.PlotOrientation
-import org.jfree.data.category.DefaultCategoryDataset
 import play.api.db.Database
 import play.api.mvc._
-import play.twirl.api.TemplateMagic.anyToDefault
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.ArrayBuffer
@@ -17,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Created by yair on 11/04/16.
   */
- class Venta @Inject()(db: Database) extends Controller {
+ class Venta @Inject()(db: Database, dataDB: Data) extends Controller {
 
   def menuVentas() = Action {
     Ok(views.html.ventas.menuVentas())
@@ -44,23 +38,21 @@ import scala.collection.mutable.ArrayBuffer
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val periodoInicio = params.get("inicio").getOrElse("")
     val periodoFin    = params.get("fin").getOrElse("")
-    val dataDB = new Data(db)
     try {
-      val data = dataDB.getVentas(
-        s"""select product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-                                  	into temp ventas_por_periodo
-                                  	from product, invoice_item, invoice
-                                  	where 1 = 1
-                                      and invoice.invoice_id = invoice_item.invoice_id
-                                      and product.product_id = invoice_item.product_id
-                                      and invoice.invoice_type_id = 'SALES_INVOICE'
-                                      and invoice.invoice_fis <> 'HISTORICA'
-                                      and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-                                      and invoice.invoice_date >= '${periodoInicio}'
-                                      and invoice.invoice_date <=  '${periodoFin}'
-                                  group by 1
-                                  order by 1,2;
-                                  """, "ventas_por_periodo")
+      val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
+        INTO TEMP ventas_por_periodo
+        FROM product, invoice_item, invoice
+        where 1 = 1
+          AND invoice.invoice_id = invoice_item.invoice_id
+          AND product.product_id = invoice_item.product_id
+          AND invoice.invoice_type_id = 'SALES_INVOICE'
+          AND invoice.invoice_fis <> 'HISTORICA'
+          AND invoice.status_id in ('INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+          AND invoice.invoice_date >= '${periodoInicio}'
+          AND invoice.invoice_date <=  '${periodoFin}'
+        GROUP BY 1
+        ORDER BY 1,2;
+        """, "SELECT * FROM ventas_por_periodo", "ventas_por_periodo")
       Ok(views.html.ventas.ventasPorPeriodo(data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>
@@ -71,9 +63,36 @@ import scala.collection.mutable.ArrayBuffer
 
   def ventasPorPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
-    println(params)
-
-    Ok(views.html.ventas.ventasPorPeriodoFamilia())
+    val familia = params.get("familia").getOrElse("")
+    val periodoInicio = params.get("inicio").getOrElse("")
+    val periodoFin = params.get("fin").getOrElse("")
+    try {
+      val data = dataDB.getVentas(s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
+      INTO TEMP ventas_por_periodo_familia
+      FROM product, invoice_item, invoice
+      WHERE 1 = 1
+        AND invoice.invoice_id = invoice_item.invoice_id
+        AND product.product_id = invoice_item.product_id
+        AND invoice.invoice_type_id = 'SALES_INVOICE'
+        AND invoice.invoice_fis <> 'HISTORICA'
+        AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+        AND invoice.invoice_date >= '${periodoInicio}'
+        AND invoice.invoice_date <=  '${periodoFin}'
+        AND product.primary_product_category_id = '${familia}'
+      GROUP BY 1
+      ORDER BY 1,2;
+      """,
+      s"""SELECT product.product_id, coalesce( ventas_por_periodo_familia.cantidad, 0) as venta
+      FROM product left outer join ventas_por_periodo_familia on product.product_id = ventas_por_periodo_familia.product_id
+        WHERE  1=1
+          AND product.primary_product_category_id = '${familia}'
+      ORDER BY 2 DESC;""", "ventas_por_periodo_familia")
+      val matriz = dataDB.getMatrixData(familia, "ventas_por_periodo_familia")
+      Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
+    } catch {
+      case e: Exception =>
+        BadRequest("No se pudo generar la consula, " + e.getMessage)
+    }
   }
 
   def getVentasPeriodo(): Map[String, Int] = {

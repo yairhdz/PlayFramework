@@ -1,3 +1,25 @@
-@()
+@(familia: String, periodoInicio: String, periodoFin: String, ventasPorPeriodoFamilia: Map[String, Int], matriz: Array[Array[String]])
 
-FAMILIA
+<br/><br/>
+<img src='@routes.Venta.createChart(ventasPorPeriodoFamilia, s"Top 20 Ventas ${familia}, periodo ${periodoInicio} - ${periodoFin}", "Productos", "Venta")'>
+<br/><br/>
+<style>
+        table, th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        table {
+            border-spacing: 15px;
+        }
+    </style>
+
+
+<table border="3" style="width:50%">
+    @matriz.map { item =>
+    <tr>
+        @item.map { value =>
+        <td><div>@value</div></td>
+        }
+    </tr>
+    }
+</table>
