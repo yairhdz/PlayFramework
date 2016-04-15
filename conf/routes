@@ -13,7 +13,7 @@ GET     /ventas/periodoFamilia      controllers.Venta.ventasPeriodoFamilia
 
 GET     /ventas/porPeriodoForm      controllers.Venta.ventasPorPeriodoForm
 GET     /ventas/porPeriodo          controllers.Venta.ventasPorPeriodo(tempTable)
-GET     /ventas/porPeriodoFamilia   controllers.Venta.ventasPorPeriodoFamilia
+GET     /ventas/porPeriodoFamilia   controllers.Venta.ventasPorPeriodoFamilia(tempTable)
 
 GET     /venta/createChart          controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario             controllers.Application.showInventario

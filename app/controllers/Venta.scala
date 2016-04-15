@@ -61,14 +61,14 @@ import scala.collection.mutable.ArrayBuffer
 
   }
 
-  def ventasPorPeriodoFamilia = Action { request =>
+  def ventasPorPeriodoFamilia(tempTable: String) = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val familia = params.get("familia").getOrElse("")
     val periodoInicio = params.get("inicio").getOrElse("")
     val periodoFin = params.get("fin").getOrElse("")
     try {
       val data = dataDB.getVentas(s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-      INTO TEMP ventas_por_periodo_familia
+      INTO TEMP ${tempTable}
       FROM product, invoice_item, invoice
       WHERE 1 = 1
         AND invoice.invoice_id = invoice_item.invoice_id
@@ -82,12 +82,12 @@ import scala.collection.mutable.ArrayBuffer
       GROUP BY 1
       ORDER BY 1,2;
       """,
-      s"""SELECT product.product_id, coalesce( ventas_por_periodo_familia.cantidad, 0) as venta
-      FROM product left outer join ventas_por_periodo_familia on product.product_id = ventas_por_periodo_familia.product_id
+      s"""SELECT product.product_id, coalesce( ${tempTable}.cantidad, 0) as venta
+      FROM product left outer join ${tempTable} on product.product_id = ${tempTable}.product_id
         WHERE  1=1
           AND product.primary_product_category_id = '${familia}'
-      ORDER BY 2 DESC;""", "ventas_por_periodo_familia")
-      val matriz = dataDB.getMatrixData(familia, "ventas_por_periodo_familia")
+      ORDER BY 2 DESC;""", tempTable)
+      val matriz = dataDB.getMatrixData(familia, tempTable)
       Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
     } catch {
       case e: Exception =>
