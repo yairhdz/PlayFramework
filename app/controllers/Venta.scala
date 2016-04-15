@@ -17,9 +17,26 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.menuVentas())
    }
 
-  def ventasPeriodo = Action {
-    val data = getVentasPeriodo()
-    Ok(views.html.ventas.ventasPeriodo(data))
+  def ventasPeriodo(tempTable: String) = Action {
+    try {
+      val data = dataDB.getVentas(s"""
+        SELECT product.primary_product_category_id, coalesce(sum(invoice_item.quantity),0) AS cantidad
+        INTO TEMP ${tempTable}
+        FROM
+          product, invoice_item, invoice
+        WHERE 1 = 1
+           AND invoice.invoice_id = invoice_item.invoice_id
+           AND product.product_id = invoice_item.product_id
+           AND invoice.invoice_type_id = 'SALES_INVOICE'
+           AND invoice.invoice_fis <> 'HISTORICA'
+           AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+        GROUP BY 1
+        ORDER BY 1,2;""", s"SELECT * FROM ${tempTable}", tempTable)
+      Ok(views.html.ventas.ventasPeriodo(data))
+    } catch {
+      case e: Exception =>
+        BadRequest("No se pudo generar la consulta, " + e.getMessage)
+    }
   }
 
   def ventasPeriodoFamilia = Action { request =>
