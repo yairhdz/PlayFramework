@@ -6,10 +6,11 @@
     <br/><br/>
 
     @ventasPeriodo.map { case (k,v) =>
-        <form action="/ventas/periodoFamilia">
+        <form action='@routes.Venta.ventasPeriodoFamilia("ventas_periodo_familia")'>
             <input type="submit" value="@k">
             <input type="text" value="@v" disabled>
-            <input type="text" name="familia" value="@k" hidden="true">
+            <input type="text" name="familia" value="@k" hidden>
+            <input type="text" name="src" value="ventas_periodo_familia" hidden>
         </form>
 
     }

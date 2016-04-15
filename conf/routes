@@ -9,7 +9,7 @@ GET     /TODO                       controllers.Application.missing
 GET     /showMenuVentas             controllers.Venta.menuVentas
 
 GET     /ventas/periodo             controllers.Venta.ventasPeriodo(src)
-GET     /ventas/periodoFamilia      controllers.Venta.ventasPeriodoFamilia
+GET     /ventas/periodoFamilia      controllers.Venta.ventasPeriodoFamilia(src)
 
 GET     /ventas/porPeriodoForm      controllers.Venta.ventasPorPeriodoForm
 GET     /ventas/porPeriodo          controllers.Venta.ventasPorPeriodo(tempTable)
