@@ -1,0 +1,33 @@
+@main("Ventas menusales"){
+    <link href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+
+    <!-- CSS to hide some elements of the DatePicker -->
+    <style type='text/css'>
+      /* Style to hide Dates / Months */
+      .ui-datepicker-calendar,.ui-datepicker-month { display: none; }​
+    </style>
+
+    <script type='text/javascript'>
+      $(function(){
+        $('.datepicker').datepicker({
+            changeMonth: false,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: '2015:2019', // Optional Year Range
+            dateFormat: 'yy',
+            onClose: function(dateText, inst) {
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).datepicker('setDate', new Date(year, 0, 1));
+            }});
+        });
+    </script>
+
+    <br/><br/>
+    <form action="@routes.Venta.ventasPeriodoMes()">
+        <input class="datepicker" type="text" name="periodo">
+        <input type="submit" formtarget="ventasPeriodoMesFrame">
+        <iframe name="ventasPeriodoMesFrame" frameborder="0" marginheight="20px" width="100%" height="100%"></iframe>
+    </form>
+}

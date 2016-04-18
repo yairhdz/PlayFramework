@@ -141,6 +141,14 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  def ventasPeriodoMesForm() = Action {
+    Ok(views.html.ventas.ventasPeriodoMesForm())
+  }
+
+  def ventasPeriodoMes = Action {
+    Ok("Ventas periodo Mes")
+  }
+
   def createChart(data: Map[String, Int], title: String, titleX: String, titleY: String) = Action { request =>
     val sortedData = ListMap(data.toList.sortWith(_._2 > _._2):_*)
     println("DATA: " + data.mkString)
