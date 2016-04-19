@@ -33,6 +33,35 @@ class Data @Inject()(db: Database)extends Controller {
     data
   }
 
+  def getVentasAllColumns(SQLIntoTemp: String, SQLSelect: String, tempTable: String): Seq[Map[String, String]] = {
+    var data: Seq[Map[String, String]] = Seq()
+    val records = new ArrayBuffer[Map[String, String]]()
+    db.withConnection{ connection =>
+      val statement = connection.createStatement()
+      statement.execute(s"DROP TABLE IF EXISTS ${tempTable};")
+      statement.execute(SQLIntoTemp)
+
+      val resultSet = statement.executeQuery(SQLSelect)
+      val resultSetMetaData = resultSet.getMetaData
+      var recordsCount = 0
+      while (resultSet.next()) {
+        var record: Map[String, String] = Map()
+        for ( a <- 1 to resultSetMetaData.getColumnCount) {
+          val key = resultSetMetaData.getColumnName(a)
+          val value = resultSet.getString(a)
+          record += key -> value
+        }
+        records.insert(recordsCount, record)
+        recordsCount += 1
+      }
+    }
+    data = records.toSeq
+//     println(data.mkString("\n"))
+    //    data = ListMap(data.toSeq.sortWith(_._2 >_._2):_*)
+    data
+  }
+
+
   def getMatrixData(familia: String, tempTable: String): (Array[Array[String]]) = {
     val ejeX = new ArrayBuffer[String]()
     val ejeY = new ArrayBuffer[String]()
