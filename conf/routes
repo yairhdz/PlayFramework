@@ -21,6 +21,7 @@ GET     /ventas/periodoMes         controllers.Venta.ventasPeriodoMes(src)
 GET     /venta/createChart          controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario             controllers.Application.showInventario
 
+GET    /jFreeChartDemo/demo           controllers.JFreeChartDemo.demo
 GET    /jFreeChartDemo/show            controllers.JFreeChartDemo.show
 GET    /jFreeChartDemo/chart           controllers.JFreeChartDemo.chart
 GET    /jFreeChartDemo/getChart           controllers.JFreeChartDemo.getChart(familia)

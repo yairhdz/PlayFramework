@@ -65,6 +65,18 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
     }
   }
 
+  def demo = Action { request=>
+    val MimeType = "image/png"
+    try {
+      val charter = new JFreeChart()
+      val imageData = charter.generateXYChart
+      Ok(imageData).as(MimeType)
+    } catch {
+      case e: Exception =>
+        BadRequest("Couldn’t generate chart. Error: " + e.getMessage)
+    }
+  }
+
   private def generateChart():Array[Byte] = {
     val values = new DefaultKeyedValues()
     values.addValue("Firefox", 39)
