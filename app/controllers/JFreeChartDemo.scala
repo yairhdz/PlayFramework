@@ -68,8 +68,8 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
   def demo = Action { request=>
     val MimeType = "image/png"
     try {
-      val charter = new JFreeChart()
-      val imageData = charter.generateXYChart
+      val charter = new Chart()
+      val imageData = charter.generateCombinedChart
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>

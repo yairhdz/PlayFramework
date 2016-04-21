@@ -233,7 +233,7 @@ import scala.collection.mutable.ArrayBuffer
     println(data.map{case (k, v) => k + "=" + v}.mkString("&"))
     val MimeType = "image/png"
     try {
-      val chart = new JFreeChart()
+      val chart = new Chart()
       val imageData = chart.generateBarChart(sortedData, title, titleX, titleY)
       Ok(imageData).as(MimeType)
     } catch {

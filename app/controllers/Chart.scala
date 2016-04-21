@@ -1,23 +1,24 @@
 package controllers
 
-import java.awt.{BasicStroke, Color}
+import java.awt.{BasicStroke, Color, Font}
 import java.io.ByteArrayOutputStream
 
-import org.jfree.chart.{ChartFactory, ChartUtilities}
-import org.jfree.chart.axis.{CategoryLabelPositions, NumberAxis}
+import org.jfree.chart.{ChartFactory, ChartUtilities, JFreeChart}
+import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.block.{BlockBorder, BlockContainer, BorderArrangement, EmptyBlock}
-import org.jfree.chart.labels.StandardXYToolTipGenerator
-import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.labels.{StandardCategoryItemLabelGenerator, StandardCategoryToolTipGenerator, StandardXYToolTipGenerator}
+import org.jfree.chart.plot.{CategoryPlot, CombinedDomainCategoryPlot, PlotOrientation}
+import org.jfree.chart.renderer.category.{BarRenderer, LineAndShapeRenderer, StandardBarPainter}
 import org.jfree.chart.renderer.xy.{StandardXYItemRenderer, XYItemRenderer, XYLineAndShapeRenderer}
 import org.jfree.chart.title.{CompositeTitle, LegendTitle}
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import org.jfree.ui.{RectangleEdge, RectangleInsets}
+import org.jfree.ui.{GradientPaintTransformType, RectangleEdge, RectangleInsets, StandardGradientPaintTransformer}
 
 /**
   * Created by yair on 13/04/16.
   */
-class JFreeChart {
+class Chart {
 
   def generateBarChart(data: Map[String, Int], title: String, titleX: String, titleY: String): Array[Byte] = {
     val values = new DefaultCategoryDataset()
@@ -140,6 +141,67 @@ class JFreeChart {
     }
 
     val image = xylineChart.createBufferedImage(width, height)
+    val byteArray = new ByteArrayOutputStream()
+    ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
+    byteArray.toByteArray()
+  }
+
+  def generateCombinedChart = {
+    val primaryDataset = new DefaultCategoryDataset()
+    primaryDataset.addValue( 1.0 , "Ventas", "Enero" )
+    primaryDataset.addValue( 2.0 , "Ventas",  "Febrero")
+    primaryDataset.addValue( 3.0 , "Ventas",  "Marzo")
+
+    val primaryRangeAxis = new NumberAxis("Venta items")
+    primaryRangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
+    val primaryRenderer = new LineAndShapeRenderer()
+    primaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
+    primaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    primaryRenderer.setBaseItemLabelsVisible(true)
+    val primarySubPlot = new CategoryPlot(primaryDataset, null, primaryRangeAxis, primaryRenderer)
+    primarySubPlot.setDomainGridlinesVisible(true)
+
+    val secondaryDataset = new DefaultCategoryDataset()
+    secondaryDataset.addValue( 1.0 , "Ordenes", "Enero" )
+    secondaryDataset.addValue( 2.0 , "Ordenes",  "Febrero")
+    secondaryDataset.addValue( 3.0 , "Ordenes",  "Marzo")
+
+    val secondaryRangeAxis = new NumberAxis("No. Ordenes")
+    secondaryRangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
+    val secondaryRenderer = new BarRenderer()
+    secondaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
+    secondaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    secondaryRenderer.setBaseItemLabelsVisible(true)
+    secondaryRenderer.setBarPainter(new StandardBarPainter)
+    secondaryRenderer.setSeriesPaint(0, new Color(85, 177, 69))
+    secondaryRenderer.setShadowPaint(new Color(.3f, .5f, .2f, 0.4f))
+    val secondarySubPlot = new CategoryPlot(secondaryDataset, null, secondaryRangeAxis, secondaryRenderer)
+    secondarySubPlot.setDomainGridlinesVisible(true)
+
+    val domainAxis = new CategoryAxis("Meses");
+    val plot = new CombinedDomainCategoryPlot(domainAxis);
+
+    plot.add(primarySubPlot)
+    plot.add(secondarySubPlot)
+
+    val combinedChart = new JFreeChart(
+      "Combined Domain Category Plot Demo",
+      new Font("SansSerif", Font.BOLD, 12),
+      plot,
+      true
+    )
+
+    combinedChart.setBackgroundPaint(new Color(0, 0, 0, 0))
+
+    val legend = combinedChart.getLegend
+    legend.setPosition(RectangleEdge.RIGHT)
+    legend.setFrame(BlockBorder.NONE)
+    legend.setBackgroundPaint(new Color(0, 0, 0, 0))
+
+    val width = 640; /* Width of the image */
+    val height = 480; /* Height of the image */
+
+    val image = combinedChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
     byteArray.toByteArray()
