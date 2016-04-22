@@ -6,14 +6,17 @@ import java.io.ByteArrayOutputStream
 import org.jfree.chart.{ChartFactory, ChartUtilities, JFreeChart}
 import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.block.{BlockBorder, BlockContainer, BorderArrangement, EmptyBlock}
-import org.jfree.chart.labels.{StandardCategoryItemLabelGenerator, StandardCategoryToolTipGenerator, StandardXYToolTipGenerator}
+import org.jfree.chart.labels._
 import org.jfree.chart.plot.{CategoryPlot, CombinedDomainCategoryPlot, PlotOrientation}
 import org.jfree.chart.renderer.category.{BarRenderer, LineAndShapeRenderer, StandardBarPainter}
 import org.jfree.chart.renderer.xy.{StandardXYItemRenderer, XYItemRenderer, XYLineAndShapeRenderer}
 import org.jfree.chart.title.{CompositeTitle, LegendTitle}
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.xy.{XYSeries, XYSeriesCollection}
-import org.jfree.ui.{GradientPaintTransformType, RectangleEdge, RectangleInsets, StandardGradientPaintTransformer}
+import org.jfree.ui._
+
+import scala.collection.immutable.ListMap
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by yair on 13/04/16.
@@ -146,7 +149,7 @@ class Chart {
     byteArray.toByteArray()
   }
 
-  def generateCombinedChart = {
+  def generateCombinedChartDemo = {
     val primaryDataset = new DefaultCategoryDataset()
     primaryDataset.addValue( 1.0 , "Ventas", "Enero" )
     primaryDataset.addValue( 2.0 , "Ventas",  "Febrero")
@@ -200,6 +203,79 @@ class Chart {
 
     val width = 640; /* Width of the image */
     val height = 480; /* Height of the image */
+
+    val image = combinedChart.createBufferedImage(width, height)
+    val byteArray = new ByteArrayOutputStream()
+    ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
+    byteArray.toByteArray()
+  }
+
+  def generateCombinedChart(primaryData: ListMap[String, Int], primaryCategoryName: String,
+                            secondaryData: ListMap[String, Int], secondaryCategoryName: String,
+                            titleX: String, primaryTitleY: String, secondaryTitleY: String, chartTitle: String) = {
+
+    var primaryMaxValue = new ArrayBuffer[Int]()
+    val primaryDataset = new DefaultCategoryDataset()
+    primaryData.foreach { case (k, v) =>
+      primaryDataset.addValue(v, primaryCategoryName, k)
+        primaryMaxValue.insert(primaryMaxValue.length, v)
+    }
+
+    primaryMaxValue = primaryMaxValue.sortWith(_ < _)
+    println(primaryMaxValue.toString)
+
+    val primaryRangeAxis = new NumberAxis(primaryTitleY)
+    primaryRangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
+    primaryRangeAxis.setRange(0.0D, primaryMaxValue.max + math.abs(primaryMaxValue(primaryMaxValue.size - 1) - primaryMaxValue(primaryMaxValue.size - 2)))
+    val primaryRenderer = new LineAndShapeRenderer()
+    primaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
+    primaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    primaryRenderer.setBaseItemLabelsVisible(true)
+//    primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.INSIDE1, TextAnchor.TOP_CENTER, TextAnchor.BASELINE_RIGHT, 100));
+    val primarySubPlot = new CategoryPlot(primaryDataset, null, primaryRangeAxis, primaryRenderer)
+    primarySubPlot.setDomainGridlinesVisible(true)
+
+    val secondaryDataset = new DefaultCategoryDataset()
+    secondaryData.foreach { case (k, v) =>
+      secondaryDataset.addValue(v, secondaryCategoryName, k)
+    }
+
+    val secondaryRangeAxis = new NumberAxis(secondaryTitleY)
+    secondaryRangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
+    val secondaryRenderer = new BarRenderer()
+    secondaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
+    secondaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    secondaryRenderer.setBaseItemLabelsVisible(true)
+    secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER,TextAnchor.CENTER));
+    secondaryRenderer.setBarPainter(new StandardBarPainter)
+    secondaryRenderer.setSeriesPaint(0, new Color(85, 177, 69))
+    secondaryRenderer.setShadowPaint(new Color(.3f, .5f, .2f, 0.4f))
+    val secondarySubPlot = new CategoryPlot(secondaryDataset, null, secondaryRangeAxis, secondaryRenderer)
+    secondarySubPlot.setDomainGridlinesVisible(false)
+    secondarySubPlot.setRangeGridlinesVisible(false)
+
+    val domainAxis = new CategoryAxis(titleX);
+    val plot = new CombinedDomainCategoryPlot(domainAxis);
+
+    plot.add(primarySubPlot)
+    plot.add(secondarySubPlot)
+
+    val combinedChart = new JFreeChart(
+      chartTitle,
+      new Font("SansSerif", Font.BOLD, 30),
+      plot,
+      true
+    )
+
+    combinedChart.setBackgroundPaint(new Color(0, 0, 0, 0))
+
+    val legend = combinedChart.getLegend
+    legend.setPosition(RectangleEdge.RIGHT)
+    legend.setFrame(BlockBorder.NONE)
+    legend.setBackgroundPaint(new Color(0, 0, 0, 0))
+
+    val width = 1200; /* Width of the image */
+    val height = 660; /* Height of the image */
 
     val image = combinedChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()

@@ -65,11 +65,58 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
     }
   }
 
+  def matchMonths(month: Int) = {
+    month match {
+      case 1 => "Enero"
+      case 2 => "Febrero"
+      case 3 => "Marzo"
+      case 4 => "Abril"
+      case 5 => "Mayo"
+      case 6 => "Junio"
+      case 7 => "Julio"
+      case 8 => "Agosto"
+      case 9 => "Septiembre"
+      case 10 => "Octubre"
+      case 11 => "Noviembre"
+      case 12 => "Diciembre"
+      case _ => " "
+    }
+  }
+
   def demo = Action { request=>
     val MimeType = "image/png"
     try {
+      val dataDB = new Data(db)
+      val data = dataDB.getVentasAllColumns("""select 	
+                                                 extract(year from invoice.invoice_date) as year, 
+                                                 extract(month from invoice.invoice_date) as month, 
+                                                 cast(coalesce( sum(invoice_item.quantity),0) as int) as items,
+                                                 count(distinct invoice.invoice_id) as facturas
+                                              into temp total_ventas_facturas
+                                              from product, invoice_item, invoice
+                                              where 1 = 1
+                                                  and invoice.invoice_id = invoice_item.invoice_id
+                                                  and product.product_id = invoice_item.product_id
+                                                  and invoice.invoice_type_id = 'SALES_INVOICE'
+                                                  and invoice.invoice_fis <> 'HISTORICA'
+                                                  and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+                                              group by 1,2
+                                              order by 2;""", "select * from total_ventas_facturas where year = '2015'", "total_ventas_facturas")
+
+      var primaryData: ListMap[String, Int] = ListMap()
+      var secondaryData: ListMap[String, Int] = ListMap()
+
+      data.foreach { record =>
+          primaryData += matchMonths(record.get("month").get.toInt) -> record.get("items").get.toInt
+          secondaryData += matchMonths(record.get("month").get.toInt) -> record.get("facturas").get.toInt
+      }
+
+//      primaryData = ListMap(primaryData.toList.sortWith(_._1.toInt < _._1.toInt):_*)
+//      secondaryData = ListMap(secondaryData.toList.sortWith(_._1.toInt < _._1.toInt):_*)
+      println(primaryData.getClass)
+
       val charter = new Chart()
-      val imageData = charter.generateCombinedChart
+      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", "Ventas totales / No. Facturas")
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>
