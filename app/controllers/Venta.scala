@@ -313,8 +313,7 @@ import scala.collection.mutable.ArrayBuffer
         from ${tempTable}
         where 1 = 1
           AND year = '${periodo}'
-          AND month = '${mes}'
-        LIMIT 20""", tempTable)
+          AND month = '${mes}'""", tempTable)
       var primaryData: ListMap[String, Int] = ListMap()
       var secondaryData: ListMap[String, Int] = ListMap()
 
@@ -322,10 +321,9 @@ import scala.collection.mutable.ArrayBuffer
         primaryData += record.get("familia").getOrElse("") -> record.get("items").get.toInt
         secondaryData += record.get("familia").getOrElse("") -> record.get("facturas").get.toInt
       }
-      println(primaryData)
-      println(secondaryData)
-      val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Ventas ${matchMonthNames(mes)} ${periodo} / No. Facturas")
-      Ok(views.html.ventas.itemsFacturasFamilias(imageData))
+
+      val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Top 20 Ventas ${matchMonthNames(mes)} ${periodo} / No. Facturas")
+      Ok(views.html.ventas.itemsFacturasFamilias(imageData, ListMap(primaryData.toSeq.sortBy(_._2):_*)))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)

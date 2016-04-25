@@ -220,10 +220,16 @@ class Chart {
 
     var primaryRangeValues = new ArrayBuffer[Int]()
     val primaryDataset = new DefaultCategoryDataset()
+    var limit = 0
     primaryData.foreach { case (k, v) =>
-      primaryDataset.addValue(v, primaryCategoryName, k)
-        primaryRangeValues.insert(primaryRangeValues.length, v)
-        width += 100
+        if (limit < 20) {
+          val productId = k
+          val venta = v
+          primaryDataset.addValue(v, primaryCategoryName, k)
+          primaryRangeValues.insert(primaryRangeValues.length, v)
+          width += 80
+          limit += 1
+        }
     }
 
     primaryRangeValues = primaryRangeValues.sortWith(_ < _)
@@ -245,8 +251,12 @@ class Chart {
     primarySubPlot.setDomainGridlinesVisible(true)
 
     val secondaryDataset = new DefaultCategoryDataset()
+    limit = 0
     secondaryData.foreach { case (k, v) =>
-      secondaryDataset.addValue(v, secondaryCategoryName, k)
+      if (limit < 20) {
+        secondaryDataset.addValue(v, secondaryCategoryName, k)
+        limit += 1
+      }
     }
 
     val secondaryRangeAxis = new NumberAxis(secondaryTitleY)

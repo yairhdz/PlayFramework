@@ -1,3 +1,14 @@
-@(chart: String)
+@(chart: String, ventasFamiliaPeriodo: Map[String, Int])
 
-<img src="data:image/png;base64,@chart">
+    <img src="data:image/png;base64,@chart">
+
+    <form action="">
+    @ventasFamiliaPeriodo.map { case (k, v) =>
+        <div>
+            <input type="submit" name="familia" value="@k">
+            <input type="text" value="@v" disabled>
+        </div>
+    }
+    </form>
+
+
