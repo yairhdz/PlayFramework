@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Created by yair on 11/04/16.
   */
- class Venta @Inject()(db: Database, dataDB: Data) extends Controller {
+ class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controller {
 
   def menuVentas() = Action {
     Ok(views.html.ventas.menuVentas())
@@ -145,20 +145,32 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.ventasPeriodoMesForm())
   }
 
-  def matchMonthNames(month: Int) = {
+  def matchMonthNames(month: String) = {
     month match {
-      case 1 => "Enero"
-      case 2 => "Febrero"
-      case 3 => "Marzo"
-      case 4 => "Abril"
-      case 5 => "Mayo"
-      case 6 => "Junio"
-      case 7 => "Julio"
-      case 8 => "Agosto"
-      case 9 => "Septiembre"
-      case 10 => "Octubre"
-      case 11 => "Noviembre"
-      case 12 => "Diciembre"
+      case "1" => "Enero"
+      case "2" => "Febrero"
+      case "3" => "Marzo"
+      case "4" => "Abril"
+      case "5" => "Mayo"
+      case "6" => "Junio"
+      case "7" => "Julio"
+      case "8" => "Agosto"
+      case "9" => "Septiembre"
+      case "10" => "Octubre"
+      case "11" => "Noviembre"
+      case "12" => "Diciembre"
+      case "Enero" => "1"
+      case "Febrero" => "2"
+      case "Marzo" => "3"
+      case "Abril" => "4"
+      case "Mayo" => "5"
+      case "Junio" => "6"
+      case "Julio" => "7"
+      case "Agosto" => "8"
+      case "Septiembre" => "9"
+      case "Octubre" => "10"
+      case "Noviembre" => "11"
+      case "Diciembre" => "12"
       case _ => " "
     }
   }
@@ -167,7 +179,7 @@ import scala.collection.mutable.ArrayBuffer
     var groupedDataMonthNames: Map[String, Map[String, Int]] = Map()
     groupedData.map { case (k, v) =>
       println(k)
-        groupedDataMonthNames += matchMonthNames(k) -> v
+        groupedDataMonthNames += matchMonthNames(k.toString) -> v
     }
     println("FINAL DATA: " + groupedDataMonthNames)
     groupedDataMonthNames
@@ -224,6 +236,99 @@ import scala.collection.mutable.ArrayBuffer
     } catch {
       case e: Exception =>
         BadRequest("No se pudo general la consulta, " + e.getMessage)
+    }
+  }
+
+  def itemsFacturasForm = Action {
+    Ok(views.html.ventas.itemsFacturasForm())
+  }
+
+  def itemsFacturas = Action { request =>
+    val params = request.queryString.map { case (k,v) => k -> v.mkString}
+    println(params)
+    val periodo = params.get("periodo").getOrElse("")
+    val tempTable = params.get("src").getOrElse("tempTable")
+    val MimeType = "image/png"
+    try {
+      val dataDB = new Data(db)
+      val data = dataDB.getVentasAllColumns(s"""select
+                                                 extract(year from invoice.invoice_date) as year,
+                                                 extract(month from invoice.invoice_date) as month,
+                                                 cast(coalesce( sum(invoice_item.quantity),0) as int) as items,
+                                                 count(distinct invoice.invoice_id) as facturas
+                                              into temp ${tempTable}
+                                              from product, invoice_item, invoice
+                                              where 1 = 1
+                                                  and invoice.invoice_id = invoice_item.invoice_id
+                                                  and product.product_id = invoice_item.product_id
+                                                  and invoice.invoice_type_id = 'SALES_INVOICE'
+                                                  and invoice.invoice_fis <> 'HISTORICA'
+                                                  and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+                                              group by 1,2
+                                              order by 2;""", s"select * from ${tempTable} where year = '${periodo}'", tempTable)
+
+      var primaryData: ListMap[String, Int] = ListMap()
+      var secondaryData: ListMap[String, Int] = ListMap()
+
+      data.foreach { record =>
+        primaryData += matchMonthNames(record.get("month").getOrElse("")) -> record.get("items").get.toInt
+        secondaryData += matchMonthNames(record.get("month").getOrElse("")) -> record.get("facturas").get.toInt
+      }
+
+      val charter = new Chart()
+      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", s"Ventas totales ${periodo} / No. Facturas")
+      Ok(views.html.ventas.itemsFacturas(imageData, primaryData, periodo))
+    } catch {
+      case e: Exception =>
+        BadRequest("Couldn’t generate chart. Error: " + e.getMessage)
+    }
+  }
+
+  def itemsFacturasFamilias = Action { implicit request =>
+    val params = request.queryString.map { case (k, v) => k -> v.mkString }
+    val periodo = params.get("periodo").getOrElse("")
+    val mes = matchMonthNames(params.get("mes").getOrElse(""))
+    val tempTable = params.get("src").getOrElse("")
+    println(periodo + " " + mes + " " + tempTable)
+    try {
+      val data = dataDB.getVentasAllColumns(s"""
+        select
+           primary_product_category_id as familia,
+           extract(year from invoice.invoice_date) as year,
+           extract(month from invoice.invoice_date) as month,
+           cast(coalesce( sum(invoice_item.quantity),0) as int) as items,
+           cast(count(distinct invoice.invoice_id) as int) as facturas
+        into temp ${tempTable}
+        from product, invoice_item, invoice
+        where 1 = 1
+            and invoice.invoice_id = invoice_item.invoice_id
+            and product.product_id = invoice_item.product_id
+            and invoice.invoice_type_id = 'SALES_INVOICE'
+            and invoice.invoice_fis <> 'HISTORICA'
+            and invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+        group by 1,2,3
+        order by 5 DESC;""", s"""
+        select
+          *
+        from ${tempTable}
+        where 1 = 1
+          AND year = '${periodo}'
+          AND month = '${mes}'
+        LIMIT 20""", tempTable)
+      var primaryData: ListMap[String, Int] = ListMap()
+      var secondaryData: ListMap[String, Int] = ListMap()
+
+      data.foreach { record =>
+        primaryData += record.get("familia").getOrElse("") -> record.get("items").get.toInt
+        secondaryData += record.get("familia").getOrElse("") -> record.get("facturas").get.toInt
+      }
+      println(primaryData)
+      println(secondaryData)
+      val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Ventas ${matchMonthNames(mes)} ${periodo} / No. Facturas")
+      Ok(views.html.ventas.itemsFacturasFamilias(imageData))
+    } catch {
+      case e: Exception =>
+        BadRequest("No se pudo generar la consulta, " + e.getMessage)
     }
   }
 

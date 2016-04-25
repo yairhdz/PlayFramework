@@ -1,0 +1,11 @@
+@(chart: String, primaryData: Map[String, Int], periodo: String)
+    <img src="data:image/png;base64,@chart">
+
+    <form action="@routes.Venta.itemsFacturasFamilias">
+    @primaryData.map { case(k, v) =>
+            <div><input type="submit" name="mes" value="@k"></div>
+    }
+        <input type="text" name="periodo" value="@periodo" hidden>
+        <input type="text" name="src" value="items_facturas_familias" hidden>
+    </form>
+

@@ -3,6 +3,7 @@ package controllers
 import java.awt.{BasicStroke, Color, Font}
 import java.io.ByteArrayOutputStream
 
+import com.google.common.io.BaseEncoding
 import org.jfree.chart.{ChartFactory, ChartUtilities, JFreeChart}
 import org.jfree.chart.axis.{CategoryAxis, CategoryLabelPositions, NumberAxis}
 import org.jfree.chart.block.{BlockBorder, BlockContainer, BorderArrangement, EmptyBlock}
@@ -117,26 +118,26 @@ class Chart {
     val primaryRenderer = plot.getRenderer()
     primaryRenderer.setSeriesPaint(1, Color.CYAN)
 
-    val secondaryRenderer = new XYLineAndShapeRenderer();
+    val secondaryRenderer = new XYLineAndShapeRenderer()
     secondaryRenderer.setSeriesPaint(0, Color.black)
     secondaryRenderer.setBaseShapesVisible(true)
     plot.setRenderer(1, secondaryRenderer)
 
-    val primaryLegendTitle = new LegendTitle(primaryRenderer);
-    val secondaryLegendTitle = new LegendTitle(secondaryRenderer);
+    val primaryLegendTitle = new LegendTitle(primaryRenderer)
+    val secondaryLegendTitle = new LegendTitle(secondaryRenderer)
     primaryLegendTitle.setPosition(RectangleEdge.RIGHT)
     secondaryLegendTitle.setPosition(RectangleEdge.RIGHT)
 
-    val localBlockContainer = new BlockContainer(new BorderArrangement());
-    localBlockContainer.add(primaryLegendTitle, RectangleEdge.LEFT);
-    localBlockContainer.add(secondaryLegendTitle, RectangleEdge.RIGHT);
-    localBlockContainer.add(new EmptyBlock(width.toDouble - 250, 0.0D));
+    val localBlockContainer = new BlockContainer(new BorderArrangement())
+    localBlockContainer.add(primaryLegendTitle, RectangleEdge.LEFT)
+    localBlockContainer.add(secondaryLegendTitle, RectangleEdge.RIGHT)
+    localBlockContainer.add(new EmptyBlock(width.toDouble - 250, 0.0D))
     localBlockContainer.setPadding(0.0, 0.0, 0.0, -50.0)
 
-    val localCompositeTitle = new CompositeTitle(localBlockContainer);
-    localCompositeTitle.setPosition(RectangleEdge.BOTTOM);
+    val localCompositeTitle = new CompositeTitle(localBlockContainer)
+    localCompositeTitle.setPosition(RectangleEdge.BOTTOM)
 
-    xylineChart.addSubtitle(localCompositeTitle);
+    xylineChart.addSubtitle(localCompositeTitle)
 
     for (j <- 0 until plot.getRendererCount; i <- 0 until  plot.getSeriesCount) {
       val renderer = plot.getRenderer(j)
@@ -181,8 +182,8 @@ class Chart {
     val secondarySubPlot = new CategoryPlot(secondaryDataset, null, secondaryRangeAxis, secondaryRenderer)
     secondarySubPlot.setDomainGridlinesVisible(true)
 
-    val domainAxis = new CategoryAxis("Meses");
-    val plot = new CombinedDomainCategoryPlot(domainAxis);
+    val domainAxis = new CategoryAxis("Meses")
+    val plot = new CombinedDomainCategoryPlot(domainAxis)
 
     plot.add(primarySubPlot)
     plot.add(secondarySubPlot)
@@ -214,24 +215,32 @@ class Chart {
                             secondaryData: ListMap[String, Int], secondaryCategoryName: String,
                             titleX: String, primaryTitleY: String, secondaryTitleY: String, chartTitle: String) = {
 
-    var primaryMaxValue = new ArrayBuffer[Int]()
+    var width = 0 /* Width of the image */
+    val height = 660 /* Height of the image */
+
+    var primaryRangeValues = new ArrayBuffer[Int]()
     val primaryDataset = new DefaultCategoryDataset()
     primaryData.foreach { case (k, v) =>
       primaryDataset.addValue(v, primaryCategoryName, k)
-        primaryMaxValue.insert(primaryMaxValue.length, v)
+        primaryRangeValues.insert(primaryRangeValues.length, v)
+        width += 100
     }
 
-    primaryMaxValue = primaryMaxValue.sortWith(_ < _)
-    println(primaryMaxValue.toString)
+    primaryRangeValues = primaryRangeValues.sortWith(_ < _)
 
     val primaryRangeAxis = new NumberAxis(primaryTitleY)
     primaryRangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
-    primaryRangeAxis.setRange(0.0D, primaryMaxValue.max + math.abs(primaryMaxValue(primaryMaxValue.size - 1) - primaryMaxValue(primaryMaxValue.size - 2)))
+    var addRangeVal = 0
+    if (primaryRangeValues.size > 0) {
+      addRangeVal = math.abs(primaryRangeValues(primaryRangeValues.size - 1) - primaryRangeValues(primaryRangeValues.size - 2))
+      if (addRangeVal < 1000) addRangeVal = 1000
+      primaryRangeAxis.setRange(0.0D, primaryRangeValues.max + addRangeVal)
+    }
     val primaryRenderer = new LineAndShapeRenderer()
     primaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
     primaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
     primaryRenderer.setBaseItemLabelsVisible(true)
-//    primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.INSIDE1, TextAnchor.TOP_CENTER, TextAnchor.BASELINE_RIGHT, 100));
+//    primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.INSIDE1, TextAnchor.TOP_CENTER, TextAnchor.BASELINE_RIGHT, 100))
     val primarySubPlot = new CategoryPlot(primaryDataset, null, primaryRangeAxis, primaryRenderer)
     primarySubPlot.setDomainGridlinesVisible(true)
 
@@ -246,7 +255,7 @@ class Chart {
     secondaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
     secondaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
     secondaryRenderer.setBaseItemLabelsVisible(true)
-    secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER,TextAnchor.CENTER));
+    secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER,TextAnchor.CENTER))
     secondaryRenderer.setBarPainter(new StandardBarPainter)
     secondaryRenderer.setSeriesPaint(0, new Color(85, 177, 69))
     secondaryRenderer.setShadowPaint(new Color(.3f, .5f, .2f, 0.4f))
@@ -254,8 +263,8 @@ class Chart {
     secondarySubPlot.setDomainGridlinesVisible(false)
     secondarySubPlot.setRangeGridlinesVisible(false)
 
-    val domainAxis = new CategoryAxis(titleX);
-    val plot = new CombinedDomainCategoryPlot(domainAxis);
+    val domainAxis = new CategoryAxis(titleX)
+    val plot = new CombinedDomainCategoryPlot(domainAxis)
 
     plot.add(primarySubPlot)
     plot.add(secondarySubPlot)
@@ -274,13 +283,13 @@ class Chart {
     legend.setFrame(BlockBorder.NONE)
     legend.setBackgroundPaint(new Color(0, 0, 0, 0))
 
-    val width = 1200; /* Width of the image */
-    val height = 660; /* Height of the image */
-
+    if (primaryData.size <= 12) width = 1200
     val image = combinedChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
-    byteArray.toByteArray()
+    println(BaseEncoding.base64().encode(byteArray.toByteArray))
+//    byteArray.toByteArray()
+    BaseEncoding.base64().encode(byteArray.toByteArray)
   }
 
 }
