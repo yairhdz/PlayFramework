@@ -17,7 +17,9 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.menuVentas())
    }
 
-  def ventasPeriodo(tempTable: String) = Action {
+  def ventasPeriodo = Action { request =>
+    val params = request.queryString.map { case (k, v) => k -> v.mkString }
+    val tempTable = params.getOrElse("src", "tempTable")
     try {
       val data = dataDB.getVentas(s"""
         SELECT product.primary_product_category_id, coalesce(sum(invoice_item.quantity),0) AS cantidad
@@ -40,9 +42,10 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  def ventasPeriodoFamilia(tempTable: String) = Action { request =>
+  def ventasPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString }
-    val familia = params.get("familia").get
+    val tempTable = params.getOrElse("src", "tempTable")
+    val familia   = params.get("familia").get
     try {
       val data = dataDB.getVentas(s"""
         SELECT

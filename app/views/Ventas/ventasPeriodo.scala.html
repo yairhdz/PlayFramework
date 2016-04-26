@@ -12,7 +12,7 @@ totales de todos los periodos con los parametros anteriores
     <br/><br/>
 
     @ventasPeriodo.map { case (k,v) =>
-        <form action='@routes.Venta.ventasPeriodoFamilia("ventas_periodo_familia")'>
+        <form action="@routes.Venta.ventasPeriodoFamilia">
             <input type="submit" value="@k">
             <input type="text" value="@v" disabled>
             <input type="text" name="familia" value="@k" hidden>
