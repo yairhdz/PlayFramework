@@ -24,7 +24,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 class Chart {
 
-  def generateBarChart(data: Map[String, Int], title: String, titleX: String, titleY: String): Array[Byte] = {
+  def generateBarChart(data: Map[String, Int], title: String, titleX: String, titleY: String): String = {
     val values = new DefaultCategoryDataset()
 
     var width = 0
@@ -62,7 +62,7 @@ class Chart {
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
 
-    byteArray.toByteArray()
+    BaseEncoding.base64().encode(byteArray.toByteArray())
   }
 
   def generateXYChart = {
@@ -297,7 +297,7 @@ class Chart {
     val image = combinedChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
-    println(BaseEncoding.base64().encode(byteArray.toByteArray))
+//    println(BaseEncoding.base64().encode(byteArray.toByteArray))
 //    byteArray.toByteArray()
     BaseEncoding.base64().encode(byteArray.toByteArray)
   }

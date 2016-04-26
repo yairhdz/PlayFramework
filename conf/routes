@@ -21,6 +21,7 @@ GET     /ventas/periodoMes                        controllers.Venta.ventasPeriod
 GET     /ventas/itemsFacturasForm                 controllers.Venta.itemsFacturasForm
 GET     /ventas/itemsFacturas                     controllers.Venta.itemsFacturas
 GET     /ventas/itemsFacturasFamilias             controllers.Venta.itemsFacturasFamilias
+GET     /ventas/itemsFacturasFamilia              controllers.Venta.itemsFacturasFamilia
 
 GET     /venta/createChart                        controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario                           controllers.Application.showInventario
