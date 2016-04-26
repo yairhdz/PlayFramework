@@ -1,8 +1,14 @@
-@(ventasPeriodo: Map[String, Int])
+@(chart: String, ventasPeriodo: Map[String, Int])
+<!--
+Vista que muestra la grafica y detalle de las ventas
+totales de todos los periodos con los parametros anteriores
+                 chart -> grafica en base64
+         ventasPeriodo -> datos correpondientes
+-->
 
 @main("Ventas de periodo por familia"){
     <br/><br/>
-    <img src='@routes.Venta.createChart(ventasPeriodo, "Top 20 Ventas por familia", "Familias", "Venta")'>
+    <img src="data:image/png;base64,@chart">
     <br/><br/>
 
     @ventasPeriodo.map { case (k,v) =>

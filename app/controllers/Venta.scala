@@ -32,7 +32,8 @@ import scala.collection.mutable.ArrayBuffer
            AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
         GROUP BY 1
         ORDER BY 1,2;""", s"SELECT * FROM ${tempTable}", tempTable)
-      Ok(views.html.ventas.ventasPeriodo(data))
+      val imageData = chart.generateBarChart(data, "Top 20 Ventas por familia", "Familias", "Venta")
+      Ok(views.html.ventas.ventasPeriodo(imageData, data))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -69,7 +70,9 @@ import scala.collection.mutable.ArrayBuffer
           AND product.primary_product_category_id = '${familia}'
         ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
-      Ok(views.html.ventas.ventasPeriodoFamilia(familia, data, matriz))
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia", "Productos", "Venta")
+//      Ok(views.html.ventas.ventasPeriodoFamilia(familia, data, matriz))
+      Ok(views.html.ventas.detalleFGMMain(familia, imageData,matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
