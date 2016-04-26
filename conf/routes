@@ -15,9 +15,6 @@ GET     /ventas/porPeriodoForm                    controllers.Venta.ventasPorPer
 GET     /ventas/porPeriodo                        controllers.Venta.ventasPorPeriodo
 GET     /ventas/porPeriodoFamilia                 controllers.Venta.ventasPorPeriodoFamilia
 
-GET     /ventas/periodoMesForm                    controllers.Venta.ventasPeriodoMesForm
-GET     /ventas/periodoMes                        controllers.Venta.ventasPeriodoMes(src)
-
 GET     /ventas/itemsFacturasForm                 controllers.Venta.itemsFacturasForm
 GET     /ventas/itemsFacturas                     controllers.Venta.itemsFacturas
 GET     /ventas/itemsFacturasFamilias             controllers.Venta.itemsFacturasFamilias

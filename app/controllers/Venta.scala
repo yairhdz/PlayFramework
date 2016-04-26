@@ -150,10 +150,6 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  def ventasPeriodoMesForm() = Action {
-    Ok(views.html.ventas.ventasPeriodoMesForm())
-  }
-
   def matchMonthNames(month: String) = {
     month match {
       case "1" => "Enero"
@@ -181,70 +177,6 @@ import scala.collection.mutable.ArrayBuffer
       case "Noviembre" => "11"
       case "Diciembre" => "12"
       case _ => " "
-    }
-  }
-
-  def changeMonthNames(groupedData: ListMap[Int, Map[String, Int]]): Map[String, Map[String, Int]]= {
-    var groupedDataMonthNames: Map[String, Map[String, Int]] = Map()
-    groupedData.map { case (k, v) =>
-      println(k)
-        groupedDataMonthNames += matchMonthNames(k.toString) -> v
-    }
-    println("FINAL DATA: " + groupedDataMonthNames)
-    groupedDataMonthNames
-  }
-
-  def groupDataByMonth(data: Seq[Map[String, String]]): Map[Int, Map[String, Int]] = {
-    var groupedData: Map[Int, Map[String, Int]] = Map()
-    data.map { record =>
-      val mes = record.get("month").get.toInt
-      var newMap: Map[String, Int] = Map()
-      val venta = record.get("items").get
-      val familia = record.get("primary_product_category_id").get
-      if (groupedData.contains(mes)) {
-        newMap = groupedData.get(mes).get
-        newMap += familia -> venta.toInt
-        groupedData += mes -> newMap
-      } else {
-        newMap += familia -> venta.toInt
-        groupedData += mes -> newMap
-      }
-    }
-//    println(groupedData.mkString("\n"))
-    groupedData
-  }
-
-  def ventasPeriodoMes(tempTable: String) = Action { request =>
-    val params = request.queryString.map { case (k, v) => k -> v.mkString}
-    val periodo = params.get("periodo").getOrElse("")
-    println("PERIODO: " + periodo)
-    try {
-      val data = dataDB.getVentasAllColumns(s"""
-        SELECT
-          product.primary_product_category_id,
-          extract(year from invoice.invoice_date) as year,
-          extract(month from invoice.invoice_date) as month,
-          cast(coalesce(sum(invoice_item.quantity),0) as int) as items
-        INTO TEMP $tempTable
-        FROM
-          product, invoice_item, invoice
-        WHERE 1 = 1
-          AND invoice.invoice_id = invoice_item.invoice_id
-          AND product.product_id = invoice_item.product_id
-          AND invoice.invoice_type_id = 'SALES_INVOICE'
-          AND invoice.invoice_fis <> 'HISTORICA'
-          AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-        GROUP BY 1, 2, 3
-        ORDER BY 1, 4, 2, 3;""", s"SELECT * FROM $tempTable WHERE $tempTable.year = '$periodo'", tempTable)
-//      println("DATA: " + data.mkString("\n"))
-      val groupedData = ListMap(groupDataByMonth(data).toSeq.sortBy(_._1):_*)
-      val groupedDataMothNames  = changeMonthNames(groupedData)
-//      println("GROUPED: " + groupedData)
-      val meses = Seq("enero", "febrero")
-      Ok(views.html.ventas.ventasPeriodoMes(periodo, meses, groupedDataMothNames))
-    } catch {
-      case e: Exception =>
-        BadRequest("No se pudo general la consulta, " + e.getMessage)
     }
   }
 
