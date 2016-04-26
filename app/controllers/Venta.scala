@@ -83,10 +83,11 @@ import scala.collection.mutable.ArrayBuffer
     Ok(views.html.ventas.ventasPorPeriodoForm())
   }
 
-  def ventasPorPeriodo(tempTable: String) = Action { request =>
+  def ventasPorPeriodo = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val periodoInicio = params.get("inicio").getOrElse("")
     val periodoFin    = params.get("fin").getOrElse("")
+    val tempTable     = params.getOrElse("src", "tempTable")
     try {
       val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
         INTO TEMP $tempTable
@@ -102,7 +103,8 @@ import scala.collection.mutable.ArrayBuffer
         GROUP BY 1
         ORDER BY 1,2;
         """, s"SELECT * FROM $tempTable", tempTable)
-      Ok(views.html.ventas.ventasPorPeriodo(data, periodoInicio, periodoFin))
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas, periodo ${periodoInicio} - ${periodoFin}", "Familias", "Venta")
+      Ok(views.html.ventas.ventasPorPeriodo(imageData, data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -110,11 +112,13 @@ import scala.collection.mutable.ArrayBuffer
 
   }
 
-  def ventasPorPeriodoFamilia(tempTable: String) = Action { request =>
+  def ventasPorPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
-    val familia = params.get("familia").getOrElse("")
     val periodoInicio = params.get("inicio").getOrElse("")
-    val periodoFin = params.get("fin").getOrElse("")
+    val periodoFin    = params.get("fin").getOrElse("")
+    val familia       = params.get("familia").getOrElse("")
+    val tempTable     = params.getOrElse("src", "tempTable")
+
     try {
       val data = dataDB.getVentas(s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
       INTO TEMP $tempTable
@@ -137,7 +141,9 @@ import scala.collection.mutable.ArrayBuffer
           AND product.primary_product_category_id = '$familia'
       ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
-      Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas ${familia}, periodo ${periodoInicio} - ${periodoFin}", "Productos", "Venta")
+//      Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
+      Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consula, " + e.getMessage)

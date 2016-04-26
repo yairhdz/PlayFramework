@@ -12,8 +12,8 @@ GET     /ventas/periodo                           controllers.Venta.ventasPeriod
 GET     /ventas/periodoFamilia                    controllers.Venta.ventasPeriodoFamilia(src)
 
 GET     /ventas/porPeriodoForm                    controllers.Venta.ventasPorPeriodoForm
-GET     /ventas/porPeriodo                        controllers.Venta.ventasPorPeriodo(tempTable)
-GET     /ventas/porPeriodoFamilia                 controllers.Venta.ventasPorPeriodoFamilia(tempTable)
+GET     /ventas/porPeriodo                        controllers.Venta.ventasPorPeriodo
+GET     /ventas/porPeriodoFamilia                 controllers.Venta.ventasPorPeriodoFamilia
 
 GET     /ventas/periodoMesForm                    controllers.Venta.ventasPeriodoMesForm
 GET     /ventas/periodoMes                        controllers.Venta.ventasPeriodoMes(src)
