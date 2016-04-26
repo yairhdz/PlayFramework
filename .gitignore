@@ -8,4 +8,5 @@ target
 /.project
 /.settings
 /.sbtserver
+.sbtserver
 /RUNNING_PID
