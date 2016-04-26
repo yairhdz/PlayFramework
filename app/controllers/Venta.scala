@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
     try {
       val data = dataDB.getVentas(s"""
         SELECT product.primary_product_category_id, coalesce(sum(invoice_item.quantity),0) AS cantidad
-        INTO TEMP ${tempTable}
+        INTO TEMP $tempTable
         FROM
           product, invoice_item, invoice
         WHERE 1 = 1
@@ -31,7 +31,7 @@ import scala.collection.mutable.ArrayBuffer
            AND invoice.invoice_fis <> 'HISTORICA'
            AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
         GROUP BY 1
-        ORDER BY 1,2;""", s"SELECT * FROM ${tempTable}", tempTable)
+        ORDER BY 1,2;""", s"SELECT * FROM $tempTable", tempTable)
       val imageData = chart.generateBarChart(data, "Top 20 Ventas por familia", "Familias", "Venta")
       Ok(views.html.ventas.ventasPeriodo(imageData, data))
     } catch {
@@ -49,7 +49,7 @@ import scala.collection.mutable.ArrayBuffer
           product.product_id,
           product.primary_product_category_id,
           coalesce( sum(invoice_item.quantity),0) AS cantidad
-        INTO TEMP ${tempTable}
+        INTO TEMP $tempTable
           FROM
             product, invoice_item, invoice
           WHERE 1 = 1
@@ -58,16 +58,16 @@ import scala.collection.mutable.ArrayBuffer
             AND invoice.invoice_type_id = 'SALES_INVOICE'
             AND invoice.invoice_fis <> 'HISTORICA'
             AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-            AND product.primary_product_category_id = '${familia}'
+            AND product.primary_product_category_id = '$familia'
           GROUP BY 1, 2
           ORDER BY 1,2;""", s"""
         SELECT
           product.product_id,
-          coalesce( ${tempTable}.cantidad, 0) as venta
+          coalesce( $tempTable.cantidad, 0) as venta
         FROM
-          product LEFT OUTER JOIN ${tempTable} ON product.product_id = ${tempTable}.product_id
+          product LEFT OUTER JOIN $tempTable ON product.product_id = $tempTable.product_id
         WHERE  1=1
-          AND product.primary_product_category_id = '${familia}'
+          AND product.primary_product_category_id = '$familia'
         ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia", "Productos", "Venta")
@@ -89,7 +89,7 @@ import scala.collection.mutable.ArrayBuffer
     val periodoFin    = params.get("fin").getOrElse("")
     try {
       val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-        INTO TEMP ${tempTable}
+        INTO TEMP $tempTable
         FROM product, invoice_item, invoice
         where 1 = 1
           AND invoice.invoice_id = invoice_item.invoice_id
@@ -97,11 +97,11 @@ import scala.collection.mutable.ArrayBuffer
           AND invoice.invoice_type_id = 'SALES_INVOICE'
           AND invoice.invoice_fis <> 'HISTORICA'
           AND invoice.status_id in ('INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-          AND invoice.invoice_date >= '${periodoInicio}'
-          AND invoice.invoice_date <=  '${periodoFin}'
+          AND invoice.invoice_date >= '$periodoInicio'
+          AND invoice.invoice_date <=  '$periodoFin'
         GROUP BY 1
         ORDER BY 1,2;
-        """, s"SELECT * FROM ${tempTable}", tempTable)
+        """, s"SELECT * FROM $tempTable", tempTable)
       Ok(views.html.ventas.ventasPorPeriodo(data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>
@@ -117,7 +117,7 @@ import scala.collection.mutable.ArrayBuffer
     val periodoFin = params.get("fin").getOrElse("")
     try {
       val data = dataDB.getVentas(s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-      INTO TEMP ${tempTable}
+      INTO TEMP $tempTable
       FROM product, invoice_item, invoice
       WHERE 1 = 1
         AND invoice.invoice_id = invoice_item.invoice_id
@@ -125,16 +125,16 @@ import scala.collection.mutable.ArrayBuffer
         AND invoice.invoice_type_id = 'SALES_INVOICE'
         AND invoice.invoice_fis <> 'HISTORICA'
         AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-        AND invoice.invoice_date >= '${periodoInicio}'
-        AND invoice.invoice_date <=  '${periodoFin}'
-        AND product.primary_product_category_id = '${familia}'
+        AND invoice.invoice_date >= '$periodoInicio'
+        AND invoice.invoice_date <=  '$periodoFin'
+        AND product.primary_product_category_id = '$familia'
       GROUP BY 1
       ORDER BY 1,2;
       """,
-      s"""SELECT product.product_id, coalesce( ${tempTable}.cantidad, 0) as venta
-      FROM product left outer join ${tempTable} on product.product_id = ${tempTable}.product_id
+      s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
+      FROM product left outer join $tempTable on product.product_id = $tempTable.product_id
         WHERE  1=1
-          AND product.primary_product_category_id = '${familia}'
+          AND product.primary_product_category_id = '$familia'
       ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
       Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
@@ -219,7 +219,7 @@ import scala.collection.mutable.ArrayBuffer
           extract(year from invoice.invoice_date) as year,
           extract(month from invoice.invoice_date) as month,
           cast(coalesce(sum(invoice_item.quantity),0) as int) as items
-        INTO TEMP ${tempTable}
+        INTO TEMP $tempTable
         FROM
           product, invoice_item, invoice
         WHERE 1 = 1
@@ -229,7 +229,7 @@ import scala.collection.mutable.ArrayBuffer
           AND invoice.invoice_fis <> 'HISTORICA'
           AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
         GROUP BY 1, 2, 3
-        ORDER BY 1, 4, 2, 3;""", s"SELECT * FROM ${tempTable} WHERE ${tempTable}.year = '${periodo}'", tempTable)
+        ORDER BY 1, 4, 2, 3;""", s"SELECT * FROM $tempTable WHERE $tempTable.year = '$periodo'", tempTable)
 //      println("DATA: " + data.mkString("\n"))
       val groupedData = ListMap(groupDataByMonth(data).toSeq.sortBy(_._1):_*)
       val groupedDataMothNames  = changeMonthNames(groupedData)
