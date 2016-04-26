@@ -375,7 +375,7 @@ import scala.collection.mutable.ArrayBuffer
 
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas ${matchMonthNames(mes)} - $periodo Familia $familia", "Productos", "Venta")
-      Ok(views.html.ventas.itemsFacturasFamilia(familia, imageData, data, matriz))
+      Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
