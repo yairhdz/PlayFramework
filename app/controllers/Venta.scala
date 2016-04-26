@@ -363,6 +363,9 @@ import scala.collection.mutable.ArrayBuffer
           coalesce($tempTable.cantidad, 0) as venta
         FROM
           product LEFT OUTER JOIN $tempTable ON product.product_id = $tempTable.product_id
+        WHERE 1 = 1
+          AND year = '$periodo'
+          AND month = '$mes'
         ORDER BY 2 DESC;""", tempTable)
       var data: ListMap[String, Int] = ListMap()
 
