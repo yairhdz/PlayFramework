@@ -18,6 +18,7 @@ import org.jfree.ui._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.macros.whitebox
 
 /**
   * Created by yair on 13/04/16.
@@ -36,7 +37,7 @@ class Chart {
         val productId = k
         val venta = v
         values.addValue(venta, "", productId)
-        width += 50
+        width += 70
         top += 1
       }
     }
@@ -45,7 +46,7 @@ class Chart {
       width = 300
     }
 
-    val chart = ChartFactory.createBarChart(
+    val barChart = ChartFactory.createBarChart(
       title,
       titleX,
       titleY,
@@ -54,11 +55,26 @@ class Chart {
       false, false, false
     )
 
-    val plot = chart.getCategoryPlot()
+    val barRenderer = new BarRenderer()
+    barRenderer.setBarPainter(new StandardBarPainter())
+    barRenderer.setSeriesPaint(0, new Color(123, 233, 104))
+    barRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    barRenderer.setBaseItemLabelsVisible(true)
+    barRenderer.setBaseItemLabelFont(new Font("Verdana", Font.PLAIN, 10))
+    barRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER))
+    barRenderer.setSeriesPaint(0, new Color(250, 80, 60))
+    barRenderer.setShadowPaint(new Color(0.9f, 0.3f, 0.2f, 0.5f))
+
+    val plot = barChart.getCategoryPlot()
+    plot.setBackgroundPaint(Color.white)
+    plot.setRangeGridlinePaint(Color.lightGray)
+    plot.setRangeGridlinesVisible(true)
+    plot.setRenderer(barRenderer)
+
     val axis = plot.getDomainAxis()
     axis.setCategoryLabelPositions(CategoryLabelPositions.UP_90)
 
-    val image = chart.createBufferedImage(width, height)
+    val image = barChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
 
@@ -213,7 +229,7 @@ class Chart {
 
   def generateCombinedChart(primaryData: ListMap[String, Int], primaryCategoryName: String,
                             secondaryData: ListMap[String, Int], secondaryCategoryName: String,
-                            titleX: String, primaryTitleY: String, secondaryTitleY: String, chartTitle: String) = {
+                            titleX: String, primaryTitleY: String, secondaryTitleY: String, chartTitle: String): String = {
 
     var width = 0 /* Width of the image */
     val height = 660 /* Height of the image */
