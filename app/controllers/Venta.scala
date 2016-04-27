@@ -195,7 +195,7 @@ import scala.collection.mutable.ArrayBuffer
     val MimeType = "image/png"
     try {
       val dataDB = new Data(db)
-      val data = dataDB.getVentasAllColumns(s"""
+      val data = dataDB.getQueryResultMap(s"""
         SELECT
            extract(year from invoice.invoice_date) AS year,
            extract(month from invoice.invoice_date) AS month,
@@ -236,7 +236,7 @@ import scala.collection.mutable.ArrayBuffer
     val tempTable = params.get("src").getOrElse("")
     println(periodo + " " + mes + " " + tempTable)
     try {
-      val data = dataDB.getVentasAllColumns(s"""
+      val data = dataDB.getQueryResultMap(s"""
         SELECT
            primary_product_category_id as familia,
            extract(year from invoice.invoice_date) as year,
@@ -282,7 +282,7 @@ import scala.collection.mutable.ArrayBuffer
     val familia = params.get("familia").getOrElse("")
     val tempTable = params.get("src").getOrElse("")
     try {
-      val records = dataDB.getVentasAllColumns(s"""
+      val records = dataDB.getQueryResultMap(s"""
         SELECT
            product.product_id,
            primary_product_category_id,

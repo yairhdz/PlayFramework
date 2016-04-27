@@ -87,7 +87,7 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
     val MimeType = "image/png"
     try {
       val dataDB = new Data(db)
-      val data = dataDB.getVentasAllColumns("""select 	
+      val data = dataDB.getQueryResultMap("""select
                                                  extract(year from invoice.invoice_date) as year, 
                                                  extract(month from invoice.invoice_date) as month, 
                                                  cast(coalesce( sum(invoice_item.quantity),0) as int) as items,

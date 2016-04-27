@@ -33,7 +33,7 @@ class Data @Inject()(db: Database)extends Controller {
     data
   }
 
-  def getVentasAllColumns(SQLIntoTemp: String, SQLSelect: String, tempTable: String): Seq[Map[String, String]] = {
+  def getQueryResultMap(SQLIntoTemp: String, SQLSelect: String, tempTable: String): Seq[Map[String, String]] = {
     var data: Seq[Map[String, String]] = Seq()
     val records = new ArrayBuffer[Map[String, String]]()
     db.withConnection{ connection =>
