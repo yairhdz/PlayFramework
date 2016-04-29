@@ -352,7 +352,7 @@ import scala.collection.mutable.ArrayBuffer
     val periodo = matchValue(params.get("periodo"), currentPeriod.toString)
     val tempTable = matchValue(params.get("src"), "tempTable")
     println(s"Periodo: $periodo $tempTable")
-    try {
+//    try {
       val resultMap = dataDB.getQueryResultMap(s"""
         SELECT
           PR.PRODUCT_ID,
@@ -379,11 +379,12 @@ import scala.collection.mutable.ArrayBuffer
         GROUP BY 1, 6, 7, 8
         ORDER BY 4, 5;""", s"""
         SELECT
-          sum(VIC.qty) AS cantidad,
-          sum(VIC.venta) AS venta_total,
+          cast(sum(VIC.qty) AS int) AS cantidad,
+          to_char(sum(VIC.venta), '9999999999999D99') AS venta_total,
           VIC.year,
           VIC.month,
-          sum(J1.amount) AS cogs
+          to_char(sum(J1.amount), '9999999999999D99') AS cogs,
+          to_char((sum(VIC.venta) - sum(J1.amount)), '9999999999999D99') AS ganancia
         FROM $tempTable VIC INNER JOIN (
             SELECT
               PR.product_id,
@@ -394,12 +395,21 @@ import scala.collection.mutable.ArrayBuffer
             WHERE ATE.GL_ACCOUNT_TYPE_ID = 'COGS_ACCOUNT'
             GROUP BY 1, 2) J1 ON VIC.shipment_id = J1.shipment_id AND VIC.product_id = J1.product_id
          GROUP BY 3, 4
-         ORDER BY 1;""", tempTable)
-      println(resultMap.mkString)
-    } catch {
-      case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
-    }
-    Ok("Ventas Ganancia Periodo")
+         ORDER BY 4;""", tempTable)
+      var items: ListMap[String, Int] = ListMap()
+      var ventas: ListMap[String, Double] = ListMap()
+      var ganancia: ListMap[String, Double] = ListMap()
+
+      resultMap.foreach { record =>
+        items += matchMonthNames(record.get("month").get) -> record.get("cantidad").get.toInt
+        ventas += matchMonthNames(record.get("month").get) -> record.get("venta_total").get.toDouble
+        ganancia += matchMonthNames(record.get("month").get) -> record.get("ganancia").get.toDouble
+      }
+      val imageData = chart.generateDualAxisCategoryChart(ventas, "ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - $periodo", "Meses", "$", "No. Items")
+      Ok(views.html.ventas.ventasGananciaPeriodo(imageData, items, ventas, ganancia))
+//    } catch {
+//      case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
+//    }
   }
 
   def createChart(data: Map[String, Int], title: String, titleX: String, titleY: String) = Action { request =>

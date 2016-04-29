@@ -2,6 +2,8 @@ package controllers
 
 import java.awt.{BasicStroke, Color, Font}
 import java.io.ByteArrayOutputStream
+import java.text.NumberFormat
+import java.util.Locale
 
 import com.google.common.io.BaseEncoding
 import org.jfree.chart.{ChartFactory, ChartUtilities, JFreeChart}
@@ -132,7 +134,7 @@ class Chart {
 
     plot.setRangeAxis(1, secondaryAxisRange)
     plot.setDataset(1, dataset2)
-    plot.setDataset(2, secondaryDataset)
+//    plot.setDataset(2, secondaryDataset)
     plot.mapDatasetToRangeAxis(1, 1)
 
 
@@ -171,6 +173,105 @@ class Chart {
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
     byteArray.toByteArray()
+  }
+
+  def generateDualAxisCategoryChart(dataOnePrimaryDataset: Map[String, Double], categoryOneName: String,
+                                    dataTwoPrimaryDataset: Map[String, Double], categoryTwoName: String,
+                                    secondaryData: Map[String, Int], secondaryCategoryName: String,
+                                    chartTitle: String, titleX: String, primaryTitleY: String, secondaryTitleY: String): String = {
+    val primaryDataset = new DefaultCategoryDataset()
+    dataOnePrimaryDataset.foreach { case (k, v) =>
+        primaryDataset.addValue(v, categoryOneName, k)
+    }
+
+    dataTwoPrimaryDataset.foreach { case (k, v) =>
+      primaryDataset.addValue(v, categoryTwoName, k)
+    }
+
+    val secondaryDataset = new DefaultCategoryDataset()
+    secondaryData.foreach { case (k, v) =>
+      secondaryDataset.addValue(v, secondaryCategoryName, k)
+    }
+
+    val lineChart = ChartFactory.createLineChart(
+      chartTitle,
+      titleX,
+      primaryTitleY,
+      primaryDataset,
+      PlotOrientation.VERTICAL,
+      false, true, false)
+
+    val width = 1200; /* Width of the image */
+    val height = 600; /* Height of the image */
+
+    val plot = lineChart.getCategoryPlot
+    plot.setBackgroundPaint(Color.white)
+    plot.setDomainGridlinePaint(Color.white)
+    plot.setRangeGridlinePaint(Color.white)
+    plot.setOutlineVisible(false)
+
+//    val currency = NumberFormat.getCurrencyInstance(new Locale("es", "CR"))
+//    val newPrimaryRaneAxis = new NumberAxis()
+//    newPrimaryRaneAxis.setNumberFormatOverride(currency)
+//    plot.setRangeAxis(0, newPrimaryRaneAxis)
+
+    val secondaryAxisRange = new NumberAxis(secondaryTitleY)
+    secondaryAxisRange.setAutoRangeIncludesZero(false)
+
+    plot.setRangeAxis(1, secondaryAxisRange)
+    plot.setDomainGridlinePaint(Color.lightGray)
+    plot.setRangeGridlinePaint(Color.lightGray)
+    plot.setDomainGridlinesVisible(true)
+    plot.setRangeGridlinesVisible(true)
+    plot.setDataset(1, secondaryDataset)
+    plot.mapDatasetToRangeAxis(1, 1)
+
+
+    val primaryRenderer = new LineAndShapeRenderer()
+    primaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_RIGHT))
+    primaryRenderer.setBaseItemLabelFont(new Font("Verdana", Font.PLAIN, 8))
+    primaryRenderer.setBaseItemLabelPaint(new Color(76, 153, 0))
+    primaryRenderer.setBaseItemLabelsVisible(true)
+    primaryRenderer.setSeriesPaint(1, Color.CYAN)
+    primaryRenderer.setBaseShapesVisible(true)
+    plot.setRenderer(0, primaryRenderer)
+
+    val secondaryRenderer = new LineAndShapeRenderer()
+    secondaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    secondaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
+    secondaryRenderer.setBaseItemLabelFont(new Font("Verdana", Font.PLAIN, 8))
+    secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE3, TextAnchor.BOTTOM_LEFT))
+    secondaryRenderer.setBaseItemLabelsVisible(true)
+    secondaryRenderer.setSeriesPaint(0, new Color(205, 149, 52))
+    secondaryRenderer.setBaseShapesVisible(true)
+    plot.setRenderer(1, secondaryRenderer)
+
+    val primaryLegendTitle = new LegendTitle(primaryRenderer)
+    val secondaryLegendTitle = new LegendTitle(secondaryRenderer)
+    primaryLegendTitle.setPosition(RectangleEdge.RIGHT)
+    secondaryLegendTitle.setPosition(RectangleEdge.RIGHT)
+
+    val localBlockContainer = new BlockContainer(new BorderArrangement())
+    localBlockContainer.add(primaryLegendTitle, RectangleEdge.LEFT)
+    localBlockContainer.add(secondaryLegendTitle, RectangleEdge.RIGHT)
+    localBlockContainer.add(new EmptyBlock(width.toDouble - 250, 0.0D))
+    localBlockContainer.setPadding(0.0, 0.0, 0.0, -50.0)
+
+    val localCompositeTitle = new CompositeTitle(localBlockContainer)
+    localCompositeTitle.setPosition(RectangleEdge.BOTTOM)
+
+    lineChart.addSubtitle(localCompositeTitle)
+
+    for (j <- 0 until plot.getRendererCount; i <- 0 until  plot.getDatasetCount) {
+      val renderer = plot.getRenderer(j)
+      renderer.setSeriesStroke(i, new BasicStroke(2))
+    }
+
+    val image = lineChart.createBufferedImage(width, height)
+    val byteArray = new ByteArrayOutputStream()
+    ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
+    BaseEncoding.base64().encode(byteArray.toByteArray())
   }
 
   def generateCombinedChartDemo = {
