@@ -116,7 +116,8 @@ class JFreeChartDemo @Inject()(db: Database) extends Controller {
       println(primaryData.getClass)
 
       val charter = new Chart()
-      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", "Ventas totales / No. Facturas")
+//      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", "Ventas totales / No. Facturas")
+        val imageData = charter.generateXYChart
       Ok(imageData).as(MimeType)
     } catch {
       case e: Exception =>

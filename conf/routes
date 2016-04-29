@@ -20,6 +20,9 @@ GET     /ventas/itemsFacturas                     controllers.Venta.itemsFactura
 GET     /ventas/itemsFacturasFamilias             controllers.Venta.itemsFacturasFamilias
 GET     /ventas/itemsFacturasFamilia              controllers.Venta.itemsFacturasFamilia
 
+GET     /ventas/ventasGanancia                    controllers.Venta.ventasGananciaForm
+GET     /ventas/ventasGananciaPeriodo             controllers.Venta.ventasGananciaPeriodo
+
 GET     /venta/createChart                        controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario                           controllers.Application.showInventario
 

@@ -101,6 +101,9 @@ class Data @Inject()(db: Database)extends Controller {
       while(prod.next()){
         val pos = prod.getInt("pos")
         val venta = prod.getString("venta")
+        val productId = prod.getString("product_id")
+        val string = venta + " " + productId
+        println(string)
         prods +=  pos -> venta
       }
     }

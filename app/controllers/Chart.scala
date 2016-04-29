@@ -82,15 +82,23 @@ class Chart {
   }
 
   def generateXYChart = {
-    val firefox = new XYSeries( "Firefox" )
-    firefox.add( 1.0 , 1.0 )
-    firefox.add( 2.0 , 4.0 )
-    firefox.add( 3.0 , 3.0 )
+    val primaryDataset = new DefaultCategoryDataset()
+    primaryDataset.addValue( 1.0 , "Ventas", "Enero" )
+    primaryDataset.addValue( 2.0 , "Ventas",  "Febrero")
+    primaryDataset.addValue( 3.0 , "Ventas",  "Marzo")
+    primaryDataset.addValue( 4.0 , "Ordenes", "Enero" )
+    primaryDataset.addValue( 2.0 , "Ordenes",  "Febrero")
+    primaryDataset.addValue( 1.0 , "Ordenes",  "Marzo")
 
-    val chrome = new XYSeries( "Chrome" )
-    chrome.add( 1.0 , 4.0 )
-    chrome.add( 2.0 , 5.0 )
-    chrome.add( 3.0 , 6.0 )
+    val secondaryDataset = new DefaultCategoryDataset()
+    secondaryDataset.addValue( 1.0 , "Ordenes", "Enero" )
+    secondaryDataset.addValue( 2.0 , "Ordenes",  "Febrero")
+    secondaryDataset.addValue( 3.0 , "Ordenes",  "Marzo")
+
+    val dataset2 = new DefaultCategoryDataset()
+    dataset2.addValue( 1.0 , "test", "Enero" )
+    dataset2.addValue( 7.0 , "test",  "Febrero")
+    dataset2.addValue( 8.0 , "test",  "Marzo")
 
     val iexplorer = new XYSeries( "InternetExplorer" )
     iexplorer.add( 2.0 , 4.0 )
@@ -100,25 +108,20 @@ class Chart {
     iexplorer.add( 6.0 , 3.0 )
     iexplorer.add( 7.0 , 4.0 )
 
-    val dataset = new XYSeriesCollection( )
-    dataset.addSeries( firefox )
-    dataset.addSeries( chrome )
+//    val dataset2 = new DefaultCategoryDataset( )
 
-    val dataset2 = new XYSeriesCollection( )
-    dataset2.addSeries( iexplorer )
-
-    val xylineChart = ChartFactory.createXYLineChart(
+    val lineChart = ChartFactory.createLineChart(
       "Browser usage statastics",
       "Category",
       "Score",
-      dataset,
+      primaryDataset,
       PlotOrientation.VERTICAL,
       false, true, false)
 
     val width = 640; /* Width of the image */
     val height = 480; /* Height of the image */
 
-    val plot = xylineChart.getXYPlot()
+    val plot = lineChart.getCategoryPlot
     plot.setBackgroundPaint(Color.white)
     plot.setDomainGridlinePaint(Color.white)
     plot.setRangeGridlinePaint(Color.white)
@@ -129,12 +132,16 @@ class Chart {
 
     plot.setRangeAxis(1, secondaryAxisRange)
     plot.setDataset(1, dataset2)
+    plot.setDataset(2, secondaryDataset)
     plot.mapDatasetToRangeAxis(1, 1)
 
-    val primaryRenderer = plot.getRenderer()
-    primaryRenderer.setSeriesPaint(1, Color.CYAN)
 
-    val secondaryRenderer = new XYLineAndShapeRenderer()
+    val primaryRenderer = new LineAndShapeRenderer()
+    primaryRenderer.setSeriesPaint(1, Color.CYAN)
+    primaryRenderer.setBaseShapesVisible(true)
+    plot.setRenderer(0, primaryRenderer)
+
+    val secondaryRenderer = new LineAndShapeRenderer()
     secondaryRenderer.setSeriesPaint(0, Color.black)
     secondaryRenderer.setBaseShapesVisible(true)
     plot.setRenderer(1, secondaryRenderer)
@@ -153,14 +160,14 @@ class Chart {
     val localCompositeTitle = new CompositeTitle(localBlockContainer)
     localCompositeTitle.setPosition(RectangleEdge.BOTTOM)
 
-    xylineChart.addSubtitle(localCompositeTitle)
+    lineChart.addSubtitle(localCompositeTitle)
 
-    for (j <- 0 until plot.getRendererCount; i <- 0 until  plot.getSeriesCount) {
+    for (j <- 0 until plot.getRendererCount; i <- 0 until  plot.getDatasetCount) {
       val renderer = plot.getRenderer(j)
       renderer.setSeriesStroke(i, new BasicStroke(2))
     }
 
-    val image = xylineChart.createBufferedImage(width, height)
+    val image = lineChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
     byteArray.toByteArray()
