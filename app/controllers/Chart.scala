@@ -3,7 +3,6 @@ package controllers
 import java.awt.{BasicStroke, Color, Font}
 import java.io.ByteArrayOutputStream
 import java.text.NumberFormat
-import java.util.Locale
 
 import com.google.common.io.BaseEncoding
 import org.jfree.chart.{ChartFactory, ChartUtilities, JFreeChart}
@@ -20,7 +19,6 @@ import org.jfree.ui._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable.ArrayBuffer
-import scala.reflect.macros.whitebox
 
 /**
   * Created by yair on 13/04/16.
@@ -210,13 +208,14 @@ class Chart {
     plot.setRangeGridlinePaint(Color.white)
     plot.setOutlineVisible(false)
 
-//    val currency = NumberFormat.getCurrencyInstance(new Locale("es", "CR"))
-//    val newPrimaryRaneAxis = new NumberAxis()
-//    newPrimaryRaneAxis.setNumberFormatOverride(currency)
-//    plot.setRangeAxis(0, newPrimaryRaneAxis)
+    val currency = NumberFormat.getCurrencyInstance()
+    val newPrimaryRaneAxis = new NumberAxis()
+    newPrimaryRaneAxis.setNumberFormatOverride(currency)
+    plot.setRangeAxis(0, newPrimaryRaneAxis)
 
     val secondaryAxisRange = new NumberAxis(secondaryTitleY)
     secondaryAxisRange.setAutoRangeIncludesZero(false)
+    secondaryAxisRange.setLabelFont(new Font("Arial", Font.PLAIN, 10))
 
     plot.setRangeAxis(1, secondaryAxisRange)
     plot.setDomainGridlinePaint(Color.lightGray)
@@ -226,11 +225,12 @@ class Chart {
     plot.setDataset(1, secondaryDataset)
     plot.mapDatasetToRangeAxis(1, 1)
 
-
     val primaryRenderer = new LineAndShapeRenderer()
-    primaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
+    val numberFormat = NumberFormat.getCurrencyInstance()
+    val baseItemLabelGenerator = new StandardCategoryItemLabelGenerator("{2}", numberFormat)
+    primaryRenderer.setBaseItemLabelGenerator(baseItemLabelGenerator)
     primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_RIGHT))
-    primaryRenderer.setBaseItemLabelFont(new Font("Verdana", Font.PLAIN, 8))
+    primaryRenderer.setBaseItemLabelFont(new Font("Arial", Font.PLAIN, 9))
     primaryRenderer.setBaseItemLabelPaint(new Color(76, 153, 0))
     primaryRenderer.setBaseItemLabelsVisible(true)
     primaryRenderer.setSeriesPaint(1, Color.CYAN)
@@ -240,7 +240,7 @@ class Chart {
     val secondaryRenderer = new LineAndShapeRenderer()
     secondaryRenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
     secondaryRenderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator())
-    secondaryRenderer.setBaseItemLabelFont(new Font("Verdana", Font.PLAIN, 8))
+    secondaryRenderer.setBaseItemLabelFont(new Font("Arial", Font.PLAIN, 9))
     secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE3, TextAnchor.BOTTOM_LEFT))
     secondaryRenderer.setBaseItemLabelsVisible(true)
     secondaryRenderer.setSeriesPaint(0, new Color(205, 149, 52))
@@ -405,7 +405,7 @@ class Chart {
 
     val combinedChart = new JFreeChart(
       chartTitle,
-      new Font("SansSerif", Font.BOLD, 30),
+      new Font("Helvetica", Font.BOLD, 30),
       plot,
       true
     )
@@ -421,8 +421,6 @@ class Chart {
     val image = combinedChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()
     ChartUtilities.writeBufferedImageAsPNG(byteArray, image)
-//    println(BaseEncoding.base64().encode(byteArray.toByteArray))
-//    byteArray.toByteArray()
     BaseEncoding.base64().encode(byteArray.toByteArray)
   }
 
