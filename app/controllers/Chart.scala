@@ -231,9 +231,10 @@ class Chart {
     primaryRenderer.setBaseItemLabelGenerator(baseItemLabelGenerator)
     primaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_RIGHT))
     primaryRenderer.setBaseItemLabelFont(new Font("Arial", Font.PLAIN, 9))
-    primaryRenderer.setBaseItemLabelPaint(new Color(76, 153, 0))
+    primaryRenderer.setBaseItemLabelPaint(new Color(255, 100, 100))
     primaryRenderer.setBaseItemLabelsVisible(true)
-    primaryRenderer.setSeriesPaint(1, Color.CYAN)
+    primaryRenderer.setSeriesPaint(0, new Color(76, 153, 0))
+    primaryRenderer.setSeriesPaint(1, new Color(100, 204, 255))
     primaryRenderer.setBaseShapesVisible(true)
     plot.setRenderer(0, primaryRenderer)
 
@@ -243,7 +244,7 @@ class Chart {
     secondaryRenderer.setBaseItemLabelFont(new Font("Arial", Font.PLAIN, 9))
     secondaryRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE3, TextAnchor.BOTTOM_LEFT))
     secondaryRenderer.setBaseItemLabelsVisible(true)
-    secondaryRenderer.setSeriesPaint(0, new Color(205, 149, 52))
+    secondaryRenderer.setSeriesPaint(0, new Color(156, 76, 0))
     secondaryRenderer.setBaseShapesVisible(true)
     plot.setRenderer(1, secondaryRenderer)
 
