@@ -1,5 +1,6 @@
 package controllers
 
+import java.text.NumberFormat
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -352,7 +353,7 @@ import scala.collection.mutable.ArrayBuffer
     val periodo = matchValue(params.get("periodo"), currentPeriod.toString)
     val tempTable = matchValue(params.get("src"), "tempTable")
     println(s"Periodo: $periodo $tempTable")
-//    try {
+    try {
       val resultMap = dataDB.getQueryResultMap(s"""
         SELECT
           PR.PRODUCT_ID,
@@ -400,16 +401,22 @@ import scala.collection.mutable.ArrayBuffer
       var ventas: ListMap[String, Double] = ListMap()
       var ganancia: ListMap[String, Double] = ListMap()
 
+      val numberFormat = NumberFormat.getCurrencyInstance()
+      var ventasCurrency: ListMap[String, String] = ListMap()
+      var gananciaCurrency: ListMap[String, String] = ListMap()
+
       resultMap.foreach { record =>
         items += matchMonthNames(record.get("month").get) -> record.get("cantidad").get.toInt
         ventas += matchMonthNames(record.get("month").get) -> record.get("venta_total").get.toDouble
         ganancia += matchMonthNames(record.get("month").get) -> record.get("ganancia").get.toDouble
+        ventasCurrency += matchMonthNames(record.get("month").get) -> numberFormat.format(record.get("venta_total").get.toDouble)
+        gananciaCurrency += matchMonthNames(record.get("month").get) -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
       val imageData = chart.generateDualAxisCategoryChart(ventas, "ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - $periodo", "Meses", "$", "No. Items")
-      Ok(views.html.ventas.ventasGananciaPeriodo(imageData, items, ventas, ganancia))
-//    } catch {
-//      case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
-//    }
+      Ok(views.html.ventas.ventasGananciaPeriodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
+    } catch {
+      case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
+    }
   }
 
   def createChart(data: Map[String, Int], title: String, titleX: String, titleY: String) = Action { request =>
