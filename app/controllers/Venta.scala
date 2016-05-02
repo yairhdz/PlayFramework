@@ -344,7 +344,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
   def ventasGananciaForm = Action {
-    Ok(views.html.ventas.ventasGananciaForm())
+    Ok(views.html.ventas.ventasGanancia.ventasGananciaForm())
   }
 
   def ventasGananciaPeriodo = Action { request =>
@@ -413,7 +413,7 @@ import scala.collection.mutable.ArrayBuffer
         gananciaCurrency += matchMonthNames(record.get("month").get) -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
       val imageData = chart.generateDualAxisCategoryChart(ventas, "ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - $periodo", "Meses", "$", "No. Items")
-      Ok(views.html.ventas.ventasGananciaPeriodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
+      Ok(views.html.ventas.ventasGanancia.ventasGananciaPeriodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
     }
