@@ -138,10 +138,13 @@ import scala.collection.immutable.ListMap
     val periodoFin    = params.getOrElse("fin", "")
     val tempTable     = params.getOrElse("src", "tempTable")
     try {
-      val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
+      val resultMap = dataDB.getQueryResultMap(s"""
+        SELECT
+          product.primary_product_category_id AS familia,
+          cast(coalesce( sum(invoice_item.quantity),0) AS int) as cantidad
         INTO TEMP $tempTable
         FROM product, invoice_item, invoice
-        where 1 = 1
+        WHERE 1 = 1
           AND invoice.invoice_id = invoice_item.invoice_id
           AND product.product_id = invoice_item.product_id
           AND invoice.invoice_type_id = 'SALES_INVOICE'
@@ -150,8 +153,15 @@ import scala.collection.immutable.ListMap
           AND invoice.invoice_date >= '$periodoInicio'
           AND invoice.invoice_date <=  '$periodoFin'
         GROUP BY 1
-        ORDER BY 1,2;
+        ORDER BY 2 DESC;
         """, s"SELECT * FROM $tempTable", tempTable)
+
+      var data: ListMap[String, Int] = ListMap()
+
+      resultMap.foreach { record =>
+        data += record.get("familia").get -> record.get("cantidad").get.toInt
+      }
+
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas, periodo $periodoInicio - $periodoFin", "Familias", "Venta")
       Ok(views.html.ventas.ventasPorPeriodo(imageData, data, periodoInicio, periodoFin))
     } catch {
@@ -176,26 +186,39 @@ import scala.collection.immutable.ListMap
     val tempTable     = params.getOrElse("src", "tempTable")
 
     try {
-      val data = dataDB.getVentas(s"""SELECT product.product_id, product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
-      INTO TEMP $tempTable
-      FROM product, invoice_item, invoice
-      WHERE 1 = 1
-        AND invoice.invoice_id = invoice_item.invoice_id
-        AND product.product_id = invoice_item.product_id
-        AND invoice.invoice_type_id = 'SALES_INVOICE'
-        AND invoice.invoice_fis <> 'HISTORICA'
-        AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
-        AND invoice.invoice_date >= '$periodoInicio'
-        AND invoice.invoice_date <=  '$periodoFin'
-        AND product.primary_product_category_id = '$familia'
-      GROUP BY 1
-      ORDER BY 1,2;
-      """,
-      s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
-      FROM product left outer join $tempTable on product.product_id = $tempTable.product_id
+      val resultMap = dataDB.getQueryResultMap(s"""
+        SELECT
+          product.product_id,
+          product.primary_product_category_id,
+          coalesce( sum(invoice_item.quantity),0) as cantidad
+        INTO TEMP $tempTable
+        FROM product, invoice_item, invoice
+        WHERE 1 = 1
+          AND invoice.invoice_id = invoice_item.invoice_id
+          AND product.product_id = invoice_item.product_id
+          AND invoice.invoice_type_id = 'SALES_INVOICE'
+          AND invoice.invoice_fis <> 'HISTORICA'
+          AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+          AND invoice.invoice_date >= '$periodoInicio'
+          AND invoice.invoice_date <=  '$periodoFin'
+          AND product.primary_product_category_id = '$familia'
+        GROUP BY 1
+        ORDER BY 1,2;
+        """, s"""
+        SELECT
+          product.product_id,
+          cast(coalesce( $tempTable.cantidad, 0) AS int) AS cantidad
+        FROM product left outer join $tempTable on product.product_id = $tempTable.product_id
         WHERE  1=1
           AND product.primary_product_category_id = '$familia'
-      ORDER BY 2 DESC;""", tempTable)
+        ORDER BY 2 DESC;""", tempTable)
+
+      var data: ListMap[String, Int] = ListMap()
+
+      resultMap.foreach { record =>
+        data += record.get("product_id").get -> record.get("cantidad").get.toInt
+      }
+
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia, periodo $periodoInicio - $periodoFin", "Productos", "Venta")
       Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
