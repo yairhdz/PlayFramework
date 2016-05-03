@@ -25,7 +25,6 @@ GET     /ventas/ventasGananciaPeriodo             controllers.Venta.ventasGananc
 GET     /ventas/ventasGananciaFamilias            controllers.Venta.ventasGananciaFamilias
 GET     /ventas/ventasGananciaFamilia             controllers.Venta.ventasGananciaFamilia
 
-GET     /venta/createChart                        controllers.Venta.createChart(data: Map[String, Int], title, titleX, titleY)
 GET     /showInventario                           controllers.Application.showInventario
 
 GET    /jFreeChartDemo/demo                       controllers.JFreeChartDemo.demo
