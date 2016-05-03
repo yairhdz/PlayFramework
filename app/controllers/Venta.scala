@@ -89,8 +89,8 @@ import scala.collection.mutable.ArrayBuffer
 
   def ventasPorPeriodo = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
-    val periodoInicio = params.get("inicio").getOrElse("")
-    val periodoFin    = params.get("fin").getOrElse("")
+    val periodoInicio = params.getOrElse("inicio", "")
+    val periodoFin    = params.getOrElse("fin", "")
     val tempTable     = params.getOrElse("src", "tempTable")
     try {
       val data = dataDB.getVentas(s"""SELECT product.primary_product_category_id, coalesce( sum(invoice_item.quantity),0) as cantidad
@@ -107,7 +107,7 @@ import scala.collection.mutable.ArrayBuffer
         GROUP BY 1
         ORDER BY 1,2;
         """, s"SELECT * FROM $tempTable", tempTable)
-      val imageData = chart.generateBarChart(data, s"Top 20 Ventas, periodo ${periodoInicio} - ${periodoFin}", "Familias", "Venta")
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas, periodo $periodoInicio - $periodoFin", "Familias", "Venta")
       Ok(views.html.ventas.ventasPorPeriodo(imageData, data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>
@@ -118,9 +118,9 @@ import scala.collection.mutable.ArrayBuffer
 
   def ventasPorPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
-    val periodoInicio = params.get("inicio").getOrElse("")
-    val periodoFin    = params.get("fin").getOrElse("")
-    val familia       = params.get("familia").getOrElse("")
+    val periodoInicio = params.getOrElse("inicio", "")
+    val periodoFin    = params.getOrElse("fin", "")
+    val familia       = params.getOrElse("familia", "")
     val tempTable     = params.getOrElse("src", "tempTable")
 
     try {
@@ -145,7 +145,7 @@ import scala.collection.mutable.ArrayBuffer
           AND product.primary_product_category_id = '$familia'
       ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
-      val imageData = chart.generateBarChart(data, s"Top 20 Ventas ${familia}, periodo ${periodoInicio} - ${periodoFin}", "Productos", "Venta")
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia, periodo $periodoInicio - $periodoFin", "Productos", "Venta")
       Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception =>
@@ -189,9 +189,9 @@ import scala.collection.mutable.ArrayBuffer
 
   def itemsFacturas = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString}
-    val periodo = params.get("periodo").getOrElse("")
-    val tempTable = params.get("src").getOrElse("")
-    val MimeType = "image/png"
+    val currentPeriod = Calendar.getInstance().get(Calendar.YEAR)
+    val periodo = matchValue(params.get("periodo"), currentPeriod.toString)
+    val tempTable = matchValue(params.get("src"), "tempTable")
     try {
       val dataDB = new Data(db)
       val data = dataDB.getQueryResultMap(s"""
@@ -215,8 +215,8 @@ import scala.collection.mutable.ArrayBuffer
       var secondaryData: ListMap[String, Int] = ListMap()
 
       data.foreach { record =>
-        primaryData += matchMonthNames(record.get("month").getOrElse("")) -> record.get("items").get.toInt
-        secondaryData += matchMonthNames(record.get("month").getOrElse("")) -> record.get("facturas").get.toInt
+        primaryData += matchMonthNames(record.get("month").get) -> record.get("items").get.toInt
+        secondaryData += matchMonthNames(record.get("month").get) -> record.get("facturas").get.toInt
       }
 
       val charter = new Chart()
@@ -230,9 +230,9 @@ import scala.collection.mutable.ArrayBuffer
 
   def itemsFacturasFamilias = Action { implicit request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
-    val periodo = params.get("periodo").getOrElse("")
-    val mes = matchMonthNames(params.get("mes").getOrElse(""))
-    val tempTable = params.get("src").getOrElse("")
+    val periodo = params.getOrElse("periodo", "")
+    val tempTable = params.getOrElse("src", "tempTable")
+    val mes = matchMonthNames(params.getOrElse("mes", ""))
     try {
       val data = dataDB.getQueryResultMap(s"""
         SELECT
@@ -261,8 +261,8 @@ import scala.collection.mutable.ArrayBuffer
       var secondaryData: ListMap[String, Int] = ListMap()
 
       data.foreach { record =>
-        primaryData += record.get("familia").getOrElse("") -> record.get("items").get.toInt
-        secondaryData += record.get("familia").getOrElse("") -> record.get("facturas").get.toInt
+        primaryData += record.get("familia").get -> record.get("items").get.toInt
+        secondaryData += record.get("familia").get -> record.get("facturas").get.toInt
       }
 
       val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Top 20 Ventas / No. Facturas - ${matchMonthNames(mes)} $periodo")
@@ -275,10 +275,10 @@ import scala.collection.mutable.ArrayBuffer
 
   def itemsFacturasFamilia = Action { request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
-    val periodo = params.get("periodo").getOrElse("")
-    val mes = params.get("mes").getOrElse("")
-    val familia = params.get("familia").getOrElse("")
-    val tempTable = params.get("src").getOrElse("")
+    val periodo = params.getOrElse("periodo", "")
+    val mes = params.getOrElse("mes", "")
+    val familia = params.getOrElse("familia", "")
+    val tempTable = params.getOrElse("src", "tempTable")
     try {
       val records = dataDB.getQueryResultMap(s"""
         SELECT
@@ -329,6 +329,7 @@ import scala.collection.mutable.ArrayBuffer
   * matchValue
   * Método que se utiliza para comparar valor de un parametro,
   * se regresa un valor de default en caso de que sea None o ""
+  * utilizado para parametros ingresador en form.
   *
   */
   def matchValue(value: Option[String], defaultValue: String): String = {
@@ -347,7 +348,7 @@ import scala.collection.mutable.ArrayBuffer
     val params = request.queryString.map { case (k,v) => k -> v.mkString}
     val currentPeriod = Calendar.getInstance().get(Calendar.YEAR)
     val periodo = matchValue(params.get("periodo"), currentPeriod.toString)
-    val tempTable = matchValue(params.get("src"), "tempTable")
+    val tempTable = params.getOrElse("src", "tempTable")
     try {
       val resultMap = dataDB.getQueryResultMap(s"""
         SELECT
