@@ -8,17 +8,28 @@ import play.api.db.Database
 import play.api.mvc._
 
 import scala.collection.immutable.ListMap
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by yair on 11/04/16.
   */
- class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controller {
+class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controller {
 
+  /**
+    *
+    * menuVentas
+    * Action que muestra la vista del submenu de Ventas(menuVentas)
+    *
+    */
   def menuVentas() = Action {
     Ok(views.html.ventas.menuVentas())
-   }
+  }
 
+  /**
+    *
+    * ventasPeriodo
+    * Action que muestra la vista de ventas de todo el periodo por familia(ventasPeriodo).
+    *
+    */
   def ventasPeriodo = Action { request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val tempTable = params.getOrElse("src", "tempTable")
@@ -44,6 +55,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * ventasPeriodoFamilia
+    * Action que muestra la vista de ventas de todo el periodo de una familia mostrando la matriz
+    * de productos.
+    *
+    */
   def ventasPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString }
     val tempTable = params.getOrElse("src", "tempTable")
@@ -83,10 +101,22 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * ventasPorPeriodoForm
+    * Action que muestra la vista del form para generar la grafica de ventasPorperiodo.
+    *
+    */
   def ventasPorPeriodoForm = Action {
     Ok(views.html.ventas.ventasPorPeriodoForm())
   }
 
+  /**
+    *
+    * ventasPorPeriodo
+    * Action que muestra la vista de ventas por familias del periodo ingresado el ventasPorPeriodoForm.
+    *
+    */
   def ventasPorPeriodo = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val periodoInicio = params.getOrElse("inicio", "")
@@ -116,6 +146,13 @@ import scala.collection.mutable.ArrayBuffer
 
   }
 
+  /**
+    *
+    * ventasPorPeriodoFamilia
+    * Action que muestra la vista de ventas de una familia del periodo ingresado el ventasPorPeriodoForm y la
+    * familia seleccionada en ventasPorPeriodo.
+    *
+    */
   def ventasPorPeriodoFamilia = Action { request =>
     val params = request.queryString.map { case(k,v) => k -> v.mkString}
     val periodoInicio = params.getOrElse("inicio", "")
@@ -139,7 +176,7 @@ import scala.collection.mutable.ArrayBuffer
       GROUP BY 1
       ORDER BY 1,2;
       """,
-      s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
+        s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
       FROM product left outer join $tempTable on product.product_id = $tempTable.product_id
         WHERE  1=1
           AND product.primary_product_category_id = '$familia'
@@ -153,6 +190,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * matchMonthNames
+    * Método que se utiliza para cambiar el nombre de los meses ya sea de numero a nombre correspondiente
+    * o viceversa.
+    *
+    */
   def matchMonthNames(month: String) = {
     month match {
       case "1" => "Enero"
@@ -183,10 +227,22 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * itemsFacturasForm
+    * Action que muestra la vista del form para generar la gráfica de ventas por items y número de facturas.
+    *
+    */
   def itemsFacturasForm = Action {
     Ok(views.html.ventas.itemsFacturasForm())
   }
 
+  /**
+    *
+    * itemsFacturas
+    * Action que muestra las ventas y numero de facturas por mes del periodo ingresado en itemsFacturasForm.
+    *
+    */
   def itemsFacturas = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString}
     val currentPeriod = Calendar.getInstance().get(Calendar.YEAR)
@@ -228,6 +284,12 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * itemsFacturasFamilias
+    * Action que muestra las ventas y numero de facturas por familias del mes y periodo seleccionados
+    *
+    */
   def itemsFacturasFamilias = Action { implicit request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val periodo = params.getOrElse("periodo", "")
@@ -273,6 +335,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * itemsFacturasFamilia
+    * Action que muestra las ventas y numero de facturas de la familia, mes y periodo seleccionados,
+    * mostrando la matiz de productos.
+    *
+    */
   def itemsFacturasFamilia = Action { request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val periodo = params.getOrElse("periodo", "")
@@ -324,14 +393,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  /*
-  *
-  * matchValue
-  * Método que se utiliza para comparar valor de un parametro,
-  * se regresa un valor de default en caso de que sea None o ""
-  * utilizado para parametros ingresador en form.
-  *
-  */
+  /**
+    *
+    * matchValue
+    * Método que se utiliza para comparar valor de un parametro, se regresa un valor de default en caso
+    * de que sea None o "" utilizado para parametros ingresados en forms.
+    *
+    */
   def matchValue(value: Option[String], defaultValue: String): String = {
     value match {
       case Some(s) => if (s.matches("")) defaultValue else s
@@ -340,10 +408,22 @@ import scala.collection.mutable.ArrayBuffer
   }
 
 
+  /**
+    *
+    * ventasGananciaForm
+    * Action que muestra la vista del form para generar la gráfica de ventas / ganancia
+    *
+    */
   def ventasGananciaForm = Action {
     Ok(views.html.ventas.ventasGanancia.ventasGananciaForm())
   }
 
+  /**
+    *
+    * ventasGananciaPeriodo
+    * Action que muestra la grafica de ventas / ganancia por mes del periodo ingresado en ventasGananciaForm.
+    *
+    */
   def ventasGananciaPeriodo = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString}
     val currentPeriod = Calendar.getInstance().get(Calendar.YEAR)
@@ -415,6 +495,12 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * ventasGananciaPeriodoFamilias
+    * Action que muestra la grafica de ventas / ganancia por familias del periodo y mes seleccionados.
+    *
+    */
   def ventasGananciaFamilias = Action { request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val periodo = params.get("periodo").get
@@ -422,7 +508,7 @@ import scala.collection.mutable.ArrayBuffer
     val tempTable = matchValue(params.get("src"), "tempTable")
     try {
       val resultMap = dataDB.getQueryResultMap(s"""
-        SELECT  PR.PRODUCT_ID, 
+        SELECT  PR.PRODUCT_ID,
           PR.PRIMARY_PRODUCT_CATEGORY_ID,
           sum(SI.QUANTITY) AS qty,
           sum((amount * conversion_factor)) AS converted_amount,
@@ -431,14 +517,14 @@ import scala.collection.mutable.ArrayBuffer
           extract(month from invoice_date) as month,
           SI.SHIPMENT_ID
         INTO TEMP $tempTable
-        FROM ((((public.INVOICE INV INNER JOIN public.INVOICE_ITEM INVI ON INV.INVOICE_ID = INVI.INVOICE_ID) 
-        	INNER JOIN public.SHIPMENT_ITEM_BILLING SIB ON INVI.INVOICE_ID = SIB.INVOICE_ID AND INVI.INVOICE_ITEM_SEQ_ID = SIB.INVOICE_ITEM_SEQ_ID) 
-        	INNER JOIN public.PRODUCT PR ON INVI.PRODUCT_ID = PR.PRODUCT_ID) 
-        	INNER JOIN public.UOM_CONVERSION_DATED CURR ON INV.CURRENCY_UOM_ID = CURR.UOM_ID) 
-        	INNER JOIN public.SHIPMENT_ITEM SI ON SIB.SHIPMENT_ID = SI.SHIPMENT_ID AND SIB.SHIPMENT_ITEM_SEQ_ID = SI.SHIPMENT_ITEM_SEQ_ID 
-        WHERE 
-        	CURR.UOM_ID_TO = 'CRC' 
-        	AND CURR.THRU_DATE IS NULL 
+        FROM ((((public.INVOICE INV INNER JOIN public.INVOICE_ITEM INVI ON INV.INVOICE_ID = INVI.INVOICE_ID)
+        	INNER JOIN public.SHIPMENT_ITEM_BILLING SIB ON INVI.INVOICE_ID = SIB.INVOICE_ID AND INVI.INVOICE_ITEM_SEQ_ID = SIB.INVOICE_ITEM_SEQ_ID)
+        	INNER JOIN public.PRODUCT PR ON INVI.PRODUCT_ID = PR.PRODUCT_ID)
+        	INNER JOIN public.UOM_CONVERSION_DATED CURR ON INV.CURRENCY_UOM_ID = CURR.UOM_ID)
+        	INNER JOIN public.SHIPMENT_ITEM SI ON SIB.SHIPMENT_ID = SI.SHIPMENT_ID AND SIB.SHIPMENT_ITEM_SEQ_ID = SI.SHIPMENT_ITEM_SEQ_ID
+        WHERE
+        	CURR.UOM_ID_TO = 'CRC'
+        	AND CURR.THRU_DATE IS NULL
         	AND INV.INVOICE_TYPE_ID = 'SALES_INVOICE'
         	AND INV.invoice_fis <> 'HISTORICA'
           AND INV.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
@@ -446,7 +532,7 @@ import scala.collection.mutable.ArrayBuffer
         	AND extract(month FROM invoice_date) = '$mes'
         GROUP BY 1, 6, 7, 8
         ORDER BY 2 ASC; """, s"""
-        SELECT  
+        SELECT
           TMP.primary_product_category_id as familia,
           cast(sum(TMP.qty) as int) AS cantidad,
           sum(TMP.venta) AS venta_total,
@@ -455,13 +541,13 @@ import scala.collection.mutable.ArrayBuffer
           sum(J1.amount) AS cogs,
           (sum(TMP.venta) - sum(J1.amount)) AS ganancia
         FROM $tempTable TMP INNER JOIN (
-          SELECT 
+          SELECT
             PR.product_id,
-            ACT.SHIPMENT_ID, 
+            ACT.SHIPMENT_ID,
             sum(ATE.AMOUNT) as amount
-          FROM public.ACCTG_TRANS ACT INNER JOIN public.ACCTG_TRANS_ENTRY ATE ON ACT.ACCTG_TRANS_ID = ATE.ACCTG_TRANS_ID 
+          FROM public.ACCTG_TRANS ACT INNER JOIN public.ACCTG_TRANS_ENTRY ATE ON ACT.ACCTG_TRANS_ID = ATE.ACCTG_TRANS_ID
             INNER JOIN product PR ON ATE.product_id = PR.product_id
-          WHERE ATE.GL_ACCOUNT_TYPE_ID = 'COGS_ACCOUNT' 
+          WHERE ATE.GL_ACCOUNT_TYPE_ID = 'COGS_ACCOUNT'
           GROUP BY 1, 2) J1 ON TMP.shipment_id = J1.shipment_id AND TMP.product_id = J1.product_id
         GROUP BY 1, 4, 5
         ORDER BY 2 DESC, 3 DESC, 6 DESC; """, tempTable)
@@ -488,6 +574,13 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
+  /**
+    *
+    * ventasGananciaPeriodoFamilia
+    * Action que muestra la grafica de ventas / ganancia de la familia, periodo y mes seleccionados,
+    * mostrando la matriz de productos.
+    *
+    */
   def ventasGananciaFamilia = Action { request =>
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val periodo = params.get("periodo").get
