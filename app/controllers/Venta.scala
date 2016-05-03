@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
 /**
   * Created by yair on 11/04/16.
   */
-class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controller {
+ class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controller {
 
   /**
     *
@@ -22,7 +22,7 @@ class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controll
     */
   def menuVentas() = Action {
     Ok(views.html.ventas.menuVentas())
-  }
+   }
 
   /**
     *
@@ -176,7 +176,7 @@ class Venta @Inject()(db: Database, dataDB: Data, chart: Chart) extends Controll
       GROUP BY 1
       ORDER BY 1,2;
       """,
-        s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
+      s"""SELECT product.product_id, coalesce( $tempTable.cantidad, 0) as venta
       FROM product left outer join $tempTable on product.product_id = $tempTable.product_id
         WHERE  1=1
           AND product.primary_product_category_id = '$familia'

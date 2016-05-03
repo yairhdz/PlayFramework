@@ -21,14 +21,12 @@ class Data @Inject()(db: Database)extends Controller {
       statement.execute(SQLIntoTemp)
 
       val resultSet = statement.executeQuery(SQLSelect)
-
       while (resultSet.next()) {
         val categoryId = resultSet.getString(1)
         val venta = resultSet.getInt(2)
         data += categoryId -> venta
       }
     }
-    // println(data.mkString)
     data = ListMap(data.toSeq.sortWith(_._2 >_._2):_*)
     data
   }
@@ -56,8 +54,6 @@ class Data @Inject()(db: Database)extends Controller {
       }
     }
     data = records.toSeq
-//     println(data.mkString("\n"))
-    //    data = ListMap(data.toSeq.sortWith(_._2 >_._2):_*)
     data
   }
 
@@ -103,8 +99,6 @@ class Data @Inject()(db: Database)extends Controller {
         val pos = prod.getInt("pos")
         val venta = prod.getString("venta")
         val productId = prod.getString("product_id")
-        val string = venta + " " + productId
-        println(string)
         prods +=  pos -> venta
       }
     }
