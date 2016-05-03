@@ -34,8 +34,10 @@ import scala.collection.immutable.ListMap
     val params = request.queryString.map { case (k, v) => k -> v.mkString }
     val tempTable = params.getOrElse("src", "tempTable")
     try {
-      val data = dataDB.getVentas(s"""
-        SELECT product.primary_product_category_id, coalesce(sum(invoice_item.quantity),0) AS cantidad
+      val resultMap = dataDB.getQueryResultMap(s"""
+        SELECT
+          product.primary_product_category_id AS familia,
+          cast(coalesce(sum(invoice_item.quantity),0) AS int) AS cantidad
         INTO TEMP $tempTable
         FROM
           product, invoice_item, invoice
@@ -46,7 +48,13 @@ import scala.collection.immutable.ListMap
            AND invoice.invoice_fis <> 'HISTORICA'
            AND invoice.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
         GROUP BY 1
-        ORDER BY 1,2;""", s"SELECT * FROM $tempTable", tempTable)
+        ORDER BY 2 DESC;""", s"SELECT * FROM $tempTable", tempTable)
+
+      var data: ListMap[String, Int] = ListMap()
+
+      resultMap.foreach { record =>
+        data += record.get("familia").get -> record.get("cantidad").get.toInt
+      }
       val imageData = chart.generateBarChart(data, "Top 20 Ventas por familia", "Familias", "Venta")
       Ok(views.html.ventas.ventasPeriodo(imageData, data))
     } catch {
@@ -67,11 +75,11 @@ import scala.collection.immutable.ListMap
     val tempTable = params.getOrElse("src", "tempTable")
     val familia   = params.get("familia").get
     try {
-      val data = dataDB.getVentas(s"""
+      val resultMap = dataDB.getQueryResultMap(s"""
         SELECT
           product.product_id,
-          product.primary_product_category_id,
-          coalesce( sum(invoice_item.quantity),0) AS cantidad
+          product.primary_product_category_id AS familia,
+          cast(coalesce( sum(invoice_item.quantity),0) AS int) AS cantidad
         INTO TEMP $tempTable
           FROM
             product, invoice_item, invoice
@@ -86,12 +94,19 @@ import scala.collection.immutable.ListMap
           ORDER BY 1,2;""", s"""
         SELECT
           product.product_id,
-          coalesce( $tempTable.cantidad, 0) as venta
+          coalesce( $tempTable.cantidad, 0) as cantidad
         FROM
           product LEFT OUTER JOIN $tempTable ON product.product_id = $tempTable.product_id
-        WHERE  1=1
+        WHERE  1 = 1
           AND product.primary_product_category_id = '$familia'
         ORDER BY 2 DESC;""", tempTable)
+
+      var data: ListMap[String, Int] = ListMap()
+
+      resultMap.foreach { record =>
+        data += record.get("product_id").get -> record.get("cantidad").get.toInt
+      }
+
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia", "Productos", "Venta")
       Ok(views.html.ventas.detalleFGMMain(familia, imageData,matriz))
