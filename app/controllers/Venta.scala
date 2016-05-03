@@ -76,7 +76,6 @@ import scala.collection.mutable.ArrayBuffer
         ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia", "Productos", "Venta")
-//      Ok(views.html.ventas.ventasPeriodoFamilia(familia, data, matriz))
       Ok(views.html.ventas.detalleFGMMain(familia, imageData,matriz))
     } catch {
       case e: Exception =>
@@ -147,7 +146,6 @@ import scala.collection.mutable.ArrayBuffer
       ORDER BY 2 DESC;""", tempTable)
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas ${familia}, periodo ${periodoInicio} - ${periodoFin}", "Productos", "Venta")
-//      Ok(views.html.ventas.ventasPorPeriodoFamilia(familia, periodoInicio, periodoFin, data, matriz))
       Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception =>
@@ -191,7 +189,6 @@ import scala.collection.mutable.ArrayBuffer
 
   def itemsFacturas = Action { request =>
     val params = request.queryString.map { case (k,v) => k -> v.mkString}
-    println(params)
     val periodo = params.get("periodo").getOrElse("")
     val tempTable = params.get("src").getOrElse("")
     val MimeType = "image/png"
@@ -236,7 +233,6 @@ import scala.collection.mutable.ArrayBuffer
     val periodo = params.get("periodo").getOrElse("")
     val mes = matchMonthNames(params.get("mes").getOrElse(""))
     val tempTable = params.get("src").getOrElse("")
-    println(periodo + " " + mes + " " + tempTable)
     try {
       val data = dataDB.getQueryResultMap(s"""
         SELECT
@@ -570,19 +566,4 @@ import scala.collection.mutable.ArrayBuffer
     }
   }
 
-  def createChart(data: Map[String, Int], title: String, titleX: String, titleY: String) = Action { request =>
-    val sortedData = ListMap(data.toList.sortWith(_._2 > _._2):_*)
-    println("DATA: " + data.mkString)
-    println(data.map{case (k, v) => k + "=" + v}.mkString("&"))
-    val MimeType = "image/png"
-    try {
-      val chart = new Chart()
-      val imageData = chart.generateBarChart(sortedData, title, titleX, titleY)
-      Ok(imageData).as(MimeType)
-    } catch {
-      case e: Exception =>
-      BadRequest("Couldn’t generate chart. Error: " + e.getMessage)
-    }
-  }
-  
 }
