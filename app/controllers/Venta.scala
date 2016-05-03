@@ -223,7 +223,7 @@ import scala.collection.mutable.ArrayBuffer
       }
 
       val charter = new Chart()
-      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", s"Ventas totales $periodo / No. Facturas")
+      val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", s"Ventas totales / No. Facturas - $periodo")
       Ok(views.html.ventas.itemsFacturas(imageData, primaryData, periodo))
     } catch {
       case e: Exception =>
@@ -269,7 +269,7 @@ import scala.collection.mutable.ArrayBuffer
         secondaryData += record.get("familia").getOrElse("") -> record.get("facturas").get.toInt
       }
 
-      val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Top 20 Ventas ${matchMonthNames(mes)} $periodo / No. Facturas")
+      val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Top 20 Ventas / No. Facturas - ${matchMonthNames(mes)} $periodo")
       Ok(views.html.ventas.itemsFacturasFamilias(imageData, ListMap(primaryData.toSeq.sortBy(_._2):_*), periodo, mes))
     } catch {
       case e: Exception =>
@@ -320,7 +320,7 @@ import scala.collection.mutable.ArrayBuffer
       }
 
       val matriz = dataDB.getMatrixData(familia, tempTable)
-      val imageData = chart.generateBarChart(data, s"Top 20 Ventas ${matchMonthNames(mes)} - $periodo Familia $familia", "Productos", "Venta")
+      val imageData = chart.generateBarChart(data, s"Top 20 Ventas / No. Facturas $familia - ${matchMonthNames(mes)} $periodo", "Productos", "Venta")
       Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception =>
@@ -330,7 +330,7 @@ import scala.collection.mutable.ArrayBuffer
 
   /*
   *
-  * matchValue()
+  * matchValue
   * Método que se utiliza para comparar valor de un parametro,
   * se regresa un valor de default en caso de que sea None o ""
   *
