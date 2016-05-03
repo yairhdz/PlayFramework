@@ -13,26 +13,15 @@ import scala.collection.mutable.ArrayBuffer
   */
 class Data @Inject()(db: Database)extends Controller {
 
-  def getVentas(SQLIntoTemp: String, SQLSelect: String, tempTable: String): Map[String, Int] = {
-    var data: Map[String, Int] = Map()
-    db.withConnection{ connection =>
-      val statement = connection.createStatement()
-      statement.execute(s"DROP TABLE IF EXISTS ${tempTable};")
-      statement.execute(SQLIntoTemp)
-
-      val resultSet = statement.executeQuery(SQLSelect)
-      while (resultSet.next()) {
-        val categoryId = resultSet.getString(1)
-        val venta = resultSet.getInt(2)
-        data += categoryId -> venta
-      }
-    }
-    data = ListMap(data.toSeq.sortWith(_._2 >_._2):_*)
-    data
-  }
-
+  /**
+    *
+    * getQueryResultMap
+    * Método que se utiliza para hacer las consultas en la base de datos y regresa todos los
+    * registros con todas los campos.
+    *
+    */
   def getQueryResultMap(SQLIntoTemp: String, SQLSelect: String, tempTable: String): Seq[Map[String, String]] = {
-    var data: Seq[Map[String, String]] = Seq()
+    var resultMap: Seq[Map[String, String]] = Seq()
     val records = new ArrayBuffer[Map[String, String]]()
     db.withConnection{ connection =>
       val statement = connection.createStatement()
@@ -53,11 +42,17 @@ class Data @Inject()(db: Database)extends Controller {
         recordsCount += 1
       }
     }
-    data = records.toSeq
-    data
+    resultMap = records
+    resultMap
   }
 
 
+  /**
+    *
+    * getMatrixData
+    * Método que se utiliza para generar la matriz de productos de una familia
+    *
+    */
   def getMatrixData(familia: String, tempTable: String): (Array[Array[String]]) = {
     val ejeX = new ArrayBuffer[String]()
     val ejeY = new ArrayBuffer[String]()
@@ -108,17 +103,17 @@ class Data @Inject()(db: Database)extends Controller {
     val numRenglones = ejeY.length
     val numColumnas =   ejeX.length
 
-    var mat = Array.ofDim[String](numRenglones + 1, numColumnas + 1)
+    var matrix = Array.ofDim[String](numRenglones + 1, numColumnas + 1)
 
     var x = 1
     for(value <- ejeX){
-      mat(0)(x) = value
+      matrix(0)(x) = value
       x += 1
     }
 
     var y = 1
     for (valueY <- ejeY) {
-      mat(y)(0) = valueY
+      matrix(y)(0) = valueY
       y += 1
     }
 
@@ -128,20 +123,20 @@ class Data @Inject()(db: Database)extends Controller {
     prods.foreach { case (k, v) =>
       if (renglon <= numRenglones) {
         if (k <= numColumnas) {
-          mat(1)(k) = v
+          matrix(1)(k) = v
         } else {
           if (newIdx <= numColumnas) {
-            mat(renglon)(newIdx) = v
+            matrix(renglon)(newIdx) = v
           } else {
             newIdx = 1
             renglon += 1
-            mat(renglon)(newIdx) = v
+            matrix(renglon)(newIdx) = v
           }
         }
         newIdx += 1
       }
     }
-    // print(mat.map(_.mkString).mkString(" \n "))
-    mat
+    // print(matrix.map(_.mkString).mkString(" \n "))
+    matrix
   }
 }
