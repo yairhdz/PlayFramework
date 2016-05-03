@@ -484,7 +484,7 @@ import scala.collection.mutable.ArrayBuffer
         ventasCurrency += record.get("familia").get -> numberFormat.format(record.get("venta_total").get.toDouble)
         gananciaCurrency += record.get("familia").get -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
-      val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - ${matchMonthNames(mes)} $periodo", "Familias", "", "No. Items")
+      val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Top 20 Ventas / Ganancia - ${matchMonthNames(mes)} $periodo", "Familias", "", "No. Items")
       Ok(views.html.ventas.ventasGanancia.familias(imageData, items, ventasCurrency, gananciaCurrency, periodo, mes))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -563,7 +563,7 @@ import scala.collection.mutable.ArrayBuffer
         ventasCurrency += record.get("product_id").get -> numberFormat.format(record.get("venta_total").get.toDouble)
         gananciaCurrency += record.get("product_id").get -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
-      val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia $familia - ${matchMonthNames(mes)} $periodo", "Productos", "", "No. Items")
+      val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Top 20 Ventas / Ganancia $familia - $mes $periodo", "Productos", "", "No. Items")
       Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
