@@ -92,11 +92,12 @@ class Data @Inject()(db: Database)extends Controller {
       val prod = statement.executeQuery(s"""
         SELECT
           product.product_id, product.posicion_matriz AS pos,
-          to_char(coalesce( ${tempTable}.cantidad, 0), '999G999D') AS venta
+          to_char(coalesce( sum(${tempTable}.cantidad), 0), '999G999D') AS venta
         FROM
           product LEFT OUTER JOIN ${tempTable} ON product.product_id = ${tempTable}.product_id
         WHERE
           product.primary_product_category_id = '${familia}'
+        GROUP BY 1, 2
         ORDER BY 2""")
       while(prod.next()){
         val pos = prod.getInt("pos")

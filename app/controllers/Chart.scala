@@ -222,6 +222,7 @@ class Chart {
     plot.setDomainGridlinePaint(Color.white)
     plot.setRangeGridlinePaint(Color.white)
     plot.setOutlineVisible(false)
+    plot.getDomainAxis.setTickLabelFont(new Font("Arial", Font.PLAIN, 9))
 
     val currency = NumberFormat.getCurrencyInstance()
     val newPrimaryRaneAxis = new NumberAxis()
