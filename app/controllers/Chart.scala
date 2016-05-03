@@ -177,18 +177,35 @@ class Chart {
                                     dataTwoPrimaryDataset: Map[String, Double], categoryTwoName: String,
                                     secondaryData: Map[String, Int], secondaryCategoryName: String,
                                     chartTitle: String, titleX: String, primaryTitleY: String, secondaryTitleY: String): String = {
+
+    var width = 0; /* Width of the image */
+    val height = 600; /* Height of the image */
+
     val primaryDataset = new DefaultCategoryDataset()
+    var limit = 0
     dataOnePrimaryDataset.foreach { case (k, v) =>
+      if (limit < 20) {
         primaryDataset.addValue(v, categoryOneName, k)
+        limit += 1
+        width += 80
+      }
     }
 
+    limit = 0
     dataTwoPrimaryDataset.foreach { case (k, v) =>
-      primaryDataset.addValue(v, categoryTwoName, k)
+      if (limit < 20) {
+        primaryDataset.addValue(v, categoryTwoName, k)
+        limit += 1
+      }
     }
 
     val secondaryDataset = new DefaultCategoryDataset()
+    limit = 0
     secondaryData.foreach { case (k, v) =>
-      secondaryDataset.addValue(v, secondaryCategoryName, k)
+      if (limit < 20) {
+        secondaryDataset.addValue(v, secondaryCategoryName, k)
+        limit += 1
+      }
     }
 
     val lineChart = ChartFactory.createLineChart(
@@ -199,8 +216,6 @@ class Chart {
       PlotOrientation.VERTICAL,
       false, true, false)
 
-    val width = 1200; /* Width of the image */
-    val height = 600; /* Height of the image */
 
     val plot = lineChart.getCategoryPlot
     plot.setBackgroundPaint(Color.white)
@@ -268,6 +283,8 @@ class Chart {
       val renderer = plot.getRenderer(j)
       renderer.setSeriesStroke(i, new BasicStroke(2))
     }
+
+    if (dataOnePrimaryDataset.size <= 12) width = 1200
 
     val image = lineChart.createBufferedImage(width, height)
     val byteArray = new ByteArrayOutputStream()

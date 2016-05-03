@@ -352,7 +352,6 @@ import scala.collection.mutable.ArrayBuffer
     val currentPeriod = Calendar.getInstance().get(Calendar.YEAR)
     val periodo = matchValue(params.get("periodo"), currentPeriod.toString)
     val tempTable = matchValue(params.get("src"), "tempTable")
-    println(s"Periodo: $periodo $tempTable")
     try {
       val resultMap = dataDB.getQueryResultMap(s"""
         SELECT
@@ -380,13 +379,13 @@ import scala.collection.mutable.ArrayBuffer
         GROUP BY 1, 6, 7, 8
         ORDER BY 4, 5;""", s"""
         SELECT
-          cast(sum(VIC.qty) AS int) AS cantidad,
-          to_char(sum(VIC.venta), '9999999999999D99') AS venta_total,
-          VIC.year,
-          VIC.month,
+          cast(sum(TMP.qty) AS int) AS cantidad,
+          to_char(sum(TMP.venta), '9999999999999D99') AS venta_total,
+          TMP.year,
+          TMP.month,
           to_char(sum(J1.amount), '9999999999999D99') AS cogs,
-          to_char((sum(VIC.venta) - sum(J1.amount)), '9999999999999D99') AS ganancia
-        FROM $tempTable VIC INNER JOIN (
+          to_char((sum(TMP.venta) - sum(J1.amount)), '9999999999999D99') AS ganancia
+        FROM $tempTable TMP INNER JOIN (
             SELECT
               PR.product_id,
               ACT.SHIPMENT_ID,
@@ -394,7 +393,7 @@ import scala.collection.mutable.ArrayBuffer
               FROM public.ACCTG_TRANS ACT INNER JOIN public.ACCTG_TRANS_ENTRY ATE ON ACT.ACCTG_TRANS_ID = ATE.ACCTG_TRANS_ID
               INNER JOIN product PR ON ATE.product_id = PR.product_id
             WHERE ATE.GL_ACCOUNT_TYPE_ID = 'COGS_ACCOUNT'
-            GROUP BY 1, 2) J1 ON VIC.shipment_id = J1.shipment_id AND VIC.product_id = J1.product_id
+            GROUP BY 1, 2) J1 ON TMP.shipment_id = J1.shipment_id AND TMP.product_id = J1.product_id
          GROUP BY 3, 4
          ORDER BY 4;""", tempTable)
       var items: ListMap[String, Int] = ListMap()
@@ -414,6 +413,79 @@ import scala.collection.mutable.ArrayBuffer
       }
       val imageData = chart.generateDualAxisCategoryChart(ventas, "ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - $periodo", "Meses", "$", "No. Items")
       Ok(views.html.ventas.ventasGanancia.ventasGananciaPeriodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
+    } catch {
+      case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
+    }
+  }
+
+  def ventasGananciaFamilias = Action { request =>
+    val params = request.queryString.map { case (k, v) => k -> v.mkString }
+    val periodo = params.get("periodo").get
+    val mes = matchMonthNames(params.get("mes").get)
+    val tempTable = matchValue(params.get("src"), "tempTable")
+    try {
+      val resultMap = dataDB.getQueryResultMap(s"""
+        SELECT  PR.PRODUCT_ID, 
+          PR.PRIMARY_PRODUCT_CATEGORY_ID,
+          sum(SI.QUANTITY) AS qty,
+          sum((amount * conversion_factor)) AS converted_amount,
+          (sum((amount * conversion_factor)) * sum(SI.quantity)) AS venta,
+          extract(year from invoice_date) as year,
+          extract(month from invoice_date) as month,
+          SI.SHIPMENT_ID
+        INTO TEMP $tempTable
+        FROM ((((public.INVOICE INV INNER JOIN public.INVOICE_ITEM INVI ON INV.INVOICE_ID = INVI.INVOICE_ID) 
+        	INNER JOIN public.SHIPMENT_ITEM_BILLING SIB ON INVI.INVOICE_ID = SIB.INVOICE_ID AND INVI.INVOICE_ITEM_SEQ_ID = SIB.INVOICE_ITEM_SEQ_ID) 
+        	INNER JOIN public.PRODUCT PR ON INVI.PRODUCT_ID = PR.PRODUCT_ID) 
+        	INNER JOIN public.UOM_CONVERSION_DATED CURR ON INV.CURRENCY_UOM_ID = CURR.UOM_ID) 
+        	INNER JOIN public.SHIPMENT_ITEM SI ON SIB.SHIPMENT_ID = SI.SHIPMENT_ID AND SIB.SHIPMENT_ITEM_SEQ_ID = SI.SHIPMENT_ITEM_SEQ_ID 
+        WHERE 
+        	CURR.UOM_ID_TO = 'CRC' 
+        	AND CURR.THRU_DATE IS NULL 
+        	AND INV.INVOICE_TYPE_ID = 'SALES_INVOICE'
+        	AND INV.invoice_fis <> 'HISTORICA'
+          AND INV.status_id in ( 'INVOICE_READY', 'INVOICE_PAID', 'INVOICE_IN_PROCESS')
+        	AND extract(year FROM invoice_date) = '$periodo'
+        	AND extract(month FROM invoice_date) = '$mes'
+        GROUP BY 1, 6, 7, 8
+        ORDER BY 2 ASC; """, s"""
+        SELECT  
+          TMP.primary_product_category_id as familia,
+          cast(sum(TMP.qty) as int) AS cantidad,
+          sum(TMP.venta) AS venta_total,
+          TMP.year,
+          TMP.month,
+          sum(J1.amount) AS cogs,
+          (sum(TMP.venta) - sum(J1.amount)) AS ganancia
+        FROM $tempTable TMP INNER JOIN (
+          SELECT 
+            PR.product_id,
+            ACT.SHIPMENT_ID, 
+            sum(ATE.AMOUNT) as amount
+          FROM public.ACCTG_TRANS ACT INNER JOIN public.ACCTG_TRANS_ENTRY ATE ON ACT.ACCTG_TRANS_ID = ATE.ACCTG_TRANS_ID 
+            INNER JOIN product PR ON ATE.product_id = PR.product_id
+          WHERE ATE.GL_ACCOUNT_TYPE_ID = 'COGS_ACCOUNT' 
+          GROUP BY 1, 2) J1 ON TMP.shipment_id = J1.shipment_id AND TMP.product_id = J1.product_id
+        GROUP BY 1, 4, 5
+        ORDER BY 2 DESC, 3 DESC, 6 DESC; """, tempTable)
+
+      var items: ListMap[String, Int] = ListMap()
+      var ventas: ListMap[String, Double] = ListMap()
+      var ganancia: ListMap[String, Double] = ListMap()
+
+      val numberFormat = NumberFormat.getCurrencyInstance()
+      var ventasCurrency: ListMap[String, String] = ListMap()
+      var gananciaCurrency: ListMap[String, String] = ListMap()
+
+      resultMap.foreach { record =>
+        items += record.get("familia").get -> record.get("cantidad").get.toInt
+        ventas += record.get("familia").get -> record.get("venta_total").get.toDouble
+        ganancia += record.get("familia").get -> record.get("ganancia").get.toDouble
+        ventasCurrency += record.get("familia").get -> numberFormat.format(record.get("venta_total").get.toDouble)
+        gananciaCurrency += record.get("familia").get -> numberFormat.format(record.get("ganancia").get.toDouble)
+      }
+      val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - ${matchMonthNames(mes)} $periodo", "Familias", "", "No. Items")
+      Ok(views.html.ventas.ventasGanancia.familias(imageData, items, ventasCurrency, gananciaCurrency, periodo))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
     }
