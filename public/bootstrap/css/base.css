@@ -1,8 +1,41 @@
 .nowrap {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 body {
   padding-top: 4em;
   background-color: #F5F8FA;
+}
+
+.navbar-default {
+  background-color: #4CC990;
+}
+
+.nav-tabs > li > a {
+  color: #FFF;
+}
+
+.nav-tabs > li > a:hover {
+  background-color: #FFF;
+  color: #000;
+}
+
+.navbar-default .nav-tabs > li > a:focus {
+  background-color: #FFF;
+  color: #000;
+}
+
+.navbar-default .nav-tabs > .active > a {
+  background-color: transparent;
+  color: #FFF;
+  padding-bottom: 10px;
+  border-bottom: 5px solid #FFF;
+}
+
+.navbar-default  .navbar-brand {
+  color: #FFF;
+}
+
+.navbar-default  .navbar-brand:hover {
+  color: #FFF;
 }
