@@ -6,8 +6,6 @@
 GET     /                                         controllers.Application.index
 GET     /TODO                                     controllers.Application.missing
 
-GET     /menuVentas                               controllers.Venta.menuVentas
-
 GET     /ventas/periodo                           controllers.Venta.ventasPeriodo
 GET     /ventas/periodoFamilia                    controllers.Venta.ventasPeriodoFamilia
 

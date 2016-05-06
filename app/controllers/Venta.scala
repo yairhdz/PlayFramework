@@ -16,16 +16,6 @@ import scala.collection.immutable.ListMap
 
   /**
     *
-    * menuVentas
-    * Action que muestra la vista del submenu de Ventas(menuVentas)
-    *
-    */
-  def menuVentas() = Action {
-    Ok(views.html.ventas.menuVentas())
-   }
-
-  /**
-    *
     * ventasPeriodo
     * Action que muestra la vista de ventas de todo el periodo por familia(ventasPeriodo).
     *
