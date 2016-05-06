@@ -38,12 +38,18 @@
                             <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
                             Inicio
                         </a>
-                    </lic>
+                    </li>
                     <li>
-                        <a href="/menuVentas">
-                            <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-                            Ventas
-                        </a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Ventas <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@routes.Venta.ventasPeriodo">Ventas del periodo</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="/ventas/porPeriodoForm">Ventas por periodo</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="@routes.Venta.itemsFacturasForm">Items / Facturas</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="/ventas/ventasGanancia">Venta / Ganancia</a></li>
+                        </ul>
                     </li>
                     <li>
                         <a href="@routes.Application.showInventario">
@@ -71,9 +77,8 @@
         <script src='@routes.Assets.versioned("bootstrap/js/jquery-2.2.3.min.js")'></script>
         <script src='@routes.Assets.versioned("bootstrap/js/bootstrap.js")'></script>
 
-
-            <div class="container">
-                @content
-            </div>
+        <div class="container-fluid">
+            @content
+        </div>
     </body>
 </html>
