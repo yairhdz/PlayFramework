@@ -1,4 +1,5 @@
 @(chart: String, primaryData: Map[String, Int], periodo: String)
+@main(""){
     <img src="data:image/png;base64,@chart">
 
     <form action="@routes.Venta.itemsFacturasFamilias">
@@ -8,4 +9,5 @@
         <input type="text" name="periodo" value="@periodo" hidden>
         <input type="text" name="src" value="items_facturas_familias" hidden>
     </form>
+}
 

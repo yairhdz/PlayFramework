@@ -1,5 +1,5 @@
 @(chart: String, ventasPorPeriodo: Map[String, Int], periodoInicio: String, periodoFin: String)
-
+@main(s"Ventas $periodoInicio - $periodoFin"){
     <img src="data:image/png;base64,@chart"/>
 
     @ventasPorPeriodo.map { case (k,v) =>
@@ -12,4 +12,5 @@
         <input type="text" name="src" value="ventas_por_periodo_familia" hidden>
     </form>
     }
+}
 

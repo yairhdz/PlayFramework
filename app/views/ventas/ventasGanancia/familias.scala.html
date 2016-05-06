@@ -1,19 +1,21 @@
 @(chart: String, items: Map[String, Int], ventas: Map[String, String], ganancias: Map[String, String], periodo: String, mes: String)
 
-<img src="data:image/png;base64,@chart">
+@main(""){
+    <img src="data:image/png;base64,@chart">
 
-<form action="/ventas/ventasGananciaFamilia">
-    <table>
-        @for((familia, value) <- items){
-        <tr>
-            <td><div><input type="submit" name="familia" value="@familia"/></div></td>
-            <td><div><input type="text" value="@items.get(familia)" disabled/></div></td>
-            <td><div><input type="text" value="@ventas.get(familia)" disabled/></div></td>
-            <td><div><input type="text" value="@ganancias.get(familia)" disabled/></div></td>
-        </tr>
-        }
-    </table>
-    <input type="text" name="src" value="venta_ganacia_familia" hidden/>
-    <input type="text" name="periodo" value="@periodo" hidden/>
-    <input type="text" name="mes" value="@mes" hidden/>
-</form>
+    <form action="/ventas/ventasGananciaFamilia">
+        <table>
+            @for((familia, value) <- items){
+            <tr>
+                <td><div><input type="submit" name="familia" value="@familia"/></div></td>
+                <td><div><input type="text" value="@items.get(familia)" disabled/></div></td>
+                <td><div><input type="text" value="@ventas.get(familia)" disabled/></div></td>
+                <td><div><input type="text" value="@ganancias.get(familia)" disabled/></div></td>
+            </tr>
+            }
+        </table>
+        <input type="text" name="src" value="venta_ganacia_familia" hidden/>
+        <input type="text" name="periodo" value="@periodo" hidden/>
+        <input type="text" name="mes" value="@mes" hidden/>
+    </form>
+}

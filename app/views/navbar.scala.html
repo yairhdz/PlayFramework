@@ -1,0 +1,53 @@
+@()
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">ILT CRC BI</a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav-menu" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!-- <a class="btn btn-primary navbar-btn pull-left" href="#" role="button">Sign up</a> -->
+        </div>
+
+        <div id="nav-menu" class="collapse navbar-collapse">
+            <ul class="nav nav-tabs nav-justified">
+                <li class="active">
+                    <a href="/">
+                        <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                        Inicio
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Ventas <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="@routes.Venta.ventasPeriodo">Ventas del periodo</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/ventas/porPeriodoForm">Ventas por periodo</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="@routes.Venta.itemsFacturasForm">Items / Facturas</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/ventas/ventasGanancia">Venta / Ganancia</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="@routes.Application.showInventario">
+                        Inventario
+                    </a>
+                </li>
+                <li>
+                    <a href="@routes.JFreeChartDemo.demo">
+                        Test
+                    </a>
+                </li>
+                <li>
+                    <a href="#about">
+                        About
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
