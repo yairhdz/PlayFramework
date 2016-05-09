@@ -46,7 +46,7 @@ import scala.collection.immutable.ListMap
         data += record.get("familia").get -> record.get("cantidad").get.toInt
       }
       val imageData = chart.generateBarChart(data, "Top 20 Ventas por familia", "Familias", "Venta")
-      Ok(views.html.ventas.ventasPeriodo(imageData, data))
+      Ok(views.html.ventas.totales.familias(imageData, data))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -113,7 +113,7 @@ import scala.collection.immutable.ListMap
     *
     */
   def ventasPorPeriodoForm = Action {
-    Ok(views.html.ventas.ventasPorPeriodoForm())
+    Ok(views.html.ventas.porPeriodo.form())
   }
 
   /**
@@ -153,7 +153,7 @@ import scala.collection.immutable.ListMap
       }
 
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas, periodo $periodoInicio - $periodoFin", "Familias", "Venta")
-      Ok(views.html.ventas.ventasPorPeriodo(imageData, data, periodoInicio, periodoFin))
+      Ok(views.html.ventas.porPeriodo.familias(imageData, data, periodoInicio, periodoFin))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -262,7 +262,7 @@ import scala.collection.immutable.ListMap
     *
     */
   def itemsFacturasForm = Action {
-    Ok(views.html.ventas.itemsFacturasForm())
+    Ok(views.html.ventas.itemsFacturas.form())
   }
 
   /**
@@ -305,7 +305,7 @@ import scala.collection.immutable.ListMap
 
       val charter = new Chart()
       val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", s"Ventas totales / No. Facturas - $periodo")
-      Ok(views.html.ventas.itemsFacturas(imageData, primaryData, periodo))
+      Ok(views.html.ventas.itemsFacturas.periodo(imageData, primaryData, periodo))
     } catch {
       case e: Exception =>
         BadRequest("Couldn’t generate chart. Error: " + e.getMessage)
@@ -356,7 +356,7 @@ import scala.collection.immutable.ListMap
       }
 
       val imageData = chart.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Familias", "No. Items", "No. Facturas", s"Top 20 Ventas / No. Facturas - ${matchMonthNames(mes)} $periodo")
-      Ok(views.html.ventas.itemsFacturasFamilias(imageData, ListMap(primaryData.toSeq.sortBy(_._2):_*), periodo, mes))
+      Ok(views.html.ventas.itemsFacturas.familias(imageData, ListMap(primaryData.toSeq.sortBy(_._2):_*), periodo, mes))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -443,7 +443,7 @@ import scala.collection.immutable.ListMap
     *
     */
   def ventasGananciaForm = Action {
-    Ok(views.html.ventas.ventasGanancia.ventasGananciaForm())
+    Ok(views.html.ventas.ventasGanancia.form())
   }
 
   /**
@@ -517,7 +517,7 @@ import scala.collection.immutable.ListMap
         gananciaCurrency += matchMonthNames(record.get("month").get) -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
       val imageData = chart.generateDualAxisCategoryChart(ventas, "ventas", ganancia, "Ganancia", items, "Items", s"Ventas / Ganancia - $periodo", "Meses", "$", "No. Items")
-      Ok(views.html.ventas.ventasGanancia.ventasGananciaPeriodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
+      Ok(views.html.ventas.ventasGanancia.periodo(imageData, items, ventasCurrency, gananciaCurrency, periodo))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
     }
