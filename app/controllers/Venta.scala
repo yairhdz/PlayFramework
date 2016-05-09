@@ -99,7 +99,7 @@ import scala.collection.immutable.ListMap
 
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia", "Productos", "Venta")
-      Ok(views.html.ventas.detalleFGMMain(familia, imageData,matriz))
+      Ok(views.html.ventas.detalleFamiliaMatrizNavbar(familia, imageData,matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -211,7 +211,7 @@ import scala.collection.immutable.ListMap
 
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas $familia, periodo $periodoInicio - $periodoFin", "Productos", "Venta")
-      Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
+      Ok(views.html.ventas.detalleFamiliaMatrizNoNavbar(familia, imageData, matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consula, " + e.getMessage)
@@ -414,7 +414,7 @@ import scala.collection.immutable.ListMap
 
       val matriz = dataDB.getMatrixData(familia, tempTable)
       val imageData = chart.generateBarChart(data, s"Top 20 Ventas / No. Facturas $familia - ${matchMonthNames(mes)} $periodo", "Productos", "Venta")
-      Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
+      Ok(views.html.ventas.detalleFamiliaMatrizNoNavbar(familia, imageData, matriz))
     } catch {
       case e: Exception =>
         BadRequest("No se pudo generar la consulta, " + e.getMessage)
@@ -682,7 +682,7 @@ import scala.collection.immutable.ListMap
         gananciaCurrency += record.get("product_id").get -> numberFormat.format(record.get("ganancia").get.toDouble)
       }
       val imageData = chart.generateDualAxisCategoryChart(ventas, "Ventas", ganancia, "Ganancia", items, "Items", s"Top 20 Ventas / Ganancia $familia - $mes $periodo", "Productos", "", "No. Items")
-      Ok(views.html.ventas.detalleFGMNoMain(familia, imageData, matriz))
+      Ok(views.html.ventas.detalleFamiliaMatrizNoNavbar(familia, imageData, matriz))
     } catch {
       case e: Exception => BadRequest("No se pudo generar la consulta, " + e.getMessage)
     }

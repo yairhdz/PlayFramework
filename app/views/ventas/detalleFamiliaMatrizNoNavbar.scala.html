@@ -1,0 +1,43 @@
+@(familia: String, chart: String, matriz: Array[Array[String]])
+
+<!--
+Detalle Familia Grafica y Matriz sin navbar.scala.html
+
+Se utiliza para generar todas las vistas que requieran estos resultados
+sin utilizar navbar.scala.html para llamarlo desde un form y ser desplegado
+dentro de un frame.
+-->
+@main(s"${familia}"){
+<div class="panel panel-success">
+    <div class="panel-heading">Gráfica</div>
+    <div class="panel-body">
+        <img src="data:image/png;base64,@chart" class="img-responsive">
+    </div>
+</div>
+
+<div class="panel panel-success">
+    <div class="panel-heading">Matriz</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                <table class="table table-bordered">
+                    @for((row, i) <- matriz.zipWithIndex) {
+                    <tr>@for((cell, idx) <- row.zipWithIndex) {
+                        @if(idx == 0 || i == 0) {
+                        <td class="success text-center"><div>@cell</div></td>
+                        } else {
+                        @if(cell.toInt != 0) {
+                        <td class="danger text-center"><div>@cell</div></td>
+                        } else {
+                        <td class="text-center"><div>@cell</div></td>
+                        }
+                        }
+                        }
+                    </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+}
