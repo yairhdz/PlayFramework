@@ -83,7 +83,7 @@ class Data @Inject()(db: Database)extends Controller {
       val prod = statement.executeQuery(s"""
         SELECT
           product.product_id, product.posicion_matriz AS pos,
-          to_char(coalesce( sum(${tempTable}.cantidad), 0), '999G999D') AS venta
+          cast(coalesce( sum(${tempTable}.cantidad), 0)AS int) AS venta
         FROM
           product LEFT OUTER JOIN ${tempTable} ON product.product_id = ${tempTable}.product_id
         WHERE
