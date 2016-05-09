@@ -6,19 +6,52 @@ totales de todos los periodos con los parametros anteriores
          ventasPeriodo -> datos correpondientes
 -->
 @navbar()
-@main("Ventas de periodo por familia"){
-    <br/><br/>
-    <img src="data:image/png;base64,@chart">
-    <br/><br/>
+@main("Ventas totales"){
+<script type="text/javascript">
+$(document).ready(function() {
+$('#example').DataTable();
+} );
+</script>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            Gráfica
+        </div>
+        <div lass="panel-body">
+            <img src="data:image/png;base64,@chart" class="img-responsive">
+        </div>
+    </div>
 
-    @ventasPeriodo.map { case (k,v) =>
-        <form action="@routes.Venta.ventasPeriodoFamilia">
-            <input type="submit" value="@k">
-            <input type="text" value="@v" disabled>
-            <input type="text" name="familia" value="@k" hidden>
-            <input type="text" name="src" value="ventas_periodo_familia" hidden>
-        </form>
-
-    }
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            Detalle
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <form action="@routes.Venta.ventasPeriodoFamilia">
+                        <input type="text" name="src" value="ventas_periodo_familia" hidden>
+                        <table id="example" class="table table-condensed table-bordered table-hover">
+                            <thead>
+                                <th class="success">
+                                    <h4 class="text-center">Familia</h4>
+                                </th>
+                                <th class="success">
+                                    <h4 class="text-center">Venta</h4>
+                                </th>
+                            </thead>
+                            <tbody>
+                                @ventasPeriodo.map { case (k,v) =>
+                                <tr>
+                                    <td><label hidden>@k</label><input type="submit" class="btn btn-danger btn-block" name="familia" value="@k"></td>
+                                    <td><h5 class="text-right">@v</h5></td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 

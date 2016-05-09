@@ -39,3 +39,8 @@ body {
 .navbar-default  .navbar-brand:hover {
   color: #FFF;
 }
+
+.label-hidden {
+  width: 0px;
+  height: 0px;
+}
