@@ -8,28 +8,36 @@ utilizando main.scala.html.
 -->
 @navbar()
 @main(s"${familia}"){
-    <br/>
-    <img src="data:image/png;base64,@chart">
-    <br/><br/>
+    <div class="panel panel-success">
+        <div class="panel-heading">Gráfica</div>
+        <div class="panel-body">
+            <img src="data:image/png;base64,@chart" class="img-responsive">
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-md-offset-3 col-md-6">
-            <table class="table table-bordered">
-                @for((row, i) <- matriz.zipWithIndex) {
-                <tr>@for((cell, idx) <- row.zipWithIndex) {
-                        @if(idx == 0 || i == 0) {
-                            <td class="success text-center"><div>@cell</div></td>
-                        } else {
-                            @if(cell.toInt != 0) {
-                                <td class="danger text-center"><div>@cell</div></td>
-                            } else {
-                                <td class="text-center"><div>@cell</div></td>
+    <div class="panel panel-success">
+        <div class="panel-heading">Matriz</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <table class="table table-bordered">
+                        @for((row, i) <- matriz.zipWithIndex) {
+                        <tr>@for((cell, idx) <- row.zipWithIndex) {
+                                @if(idx == 0 || i == 0) {
+                                    <td class="success text-center"><div>@cell</div></td>
+                                } else {
+                                    @if(cell.toInt != 0) {
+                                        <td class="danger text-center"><div>@cell</div></td>
+                                    } else {
+                                        <td class="text-center"><div>@cell</div></td>
+                                    }
+                                }
                             }
+                        </tr>
                         }
-                    }
-                </tr>
-                }
-            </table>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 }
