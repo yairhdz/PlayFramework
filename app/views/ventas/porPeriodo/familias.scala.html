@@ -1,16 +1,39 @@
 @(chart: String, ventasPorPeriodo: Map[String, Int], periodoInicio: String, periodoFin: String)
 @main(s"Ventas $periodoInicio - $periodoFin"){
-    <img src="data:image/png;base64,@chart"/>
+    <div class="panel panel-success">
+        <div class="panel-heading">Gráfica</div>
+        <div class="panel-body">
+            <img class="img-responsive" src="data:image/png;base64,@chart"/>
+        </div>
+    </div>
+    <div class="panel panel-success">
+        <div class="panel-heading">Detalle</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <form action="@routes.Venta.ventasPorPeriodoFamilia">
+                        <table class="table table-condensed table-bordered table-hover table-detail">
+                            <thead>
+                                <th class="success">Familia</th>
+                                <th class="success">Venta</th>
+                            </thead>
+                            <tbody>
+                                @ventasPorPeriodo.map { case (k,v) =>
+                                    <tr>
+                                        <td><label hidden>@k</label><input class="btn btn-danger btn-block" name="familia" type="submit" value="@k"> </td>
+                                        <td><h5 class="text-right">@v</h5></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <input type="date" name="inicio" value="@periodoInicio" hidden>
+                        <input type="date" name="fin" value="@periodoFin" hidden>
+                        <input type="text" name="src" value="ventas_por_periodo_familia" hidden>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @ventasPorPeriodo.map { case (k,v) =>
-    <form action="@routes.Venta.ventasPorPeriodoFamilia">
-        <input type="submit" value="@k">
-        <input type="text" value="@v" disabled>
-        <input type="text" name="familia" value="@k" hidden>
-        <input type="date" name="inicio" value="@periodoInicio" hidden>
-        <input type="date" name="fin" value="@periodoFin" hidden>
-        <input type="text" name="src" value="ventas_por_periodo_familia" hidden>
-    </form>
-    }
 }
 

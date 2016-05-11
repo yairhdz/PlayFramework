@@ -4,15 +4,15 @@
         <div class="panel-body">
             <form action="@routes.Venta.ventasPorPeriodo">
                 <div class="form-group">
-                    <div class="input-group date datetimepicker col-md-2">
-                       <span class="input-group-addon span-width">Inicio</span>
+                    <div class="input-group date datetimepicker col-md-3">
+                       <span class="input-group-addon span-width-90">Inicio</span>
                        <input class="form-control readonly" type="text" name="inicio" readonly>
                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="input-group date datetimepicker col-md-2">
-                        <span class="input-group-addon span-width">Fin</span>
+                    <div class="input-group date datetimepicker col-md-3">
+                        <span class="input-group-addon span-width-90">Fin</span>
                         <input class="form-control" type="text" name="fin" readonly>
                         <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                     </div>
@@ -22,5 +22,6 @@
             </form>
         </div>
     </div>
-    <iframe name="ventas_por_periodo" frameborder="0" width="100%" marginheight="20px" height="100%"></iframe>
+    <iframe name="ventas_por_periodo"/>
+
 }
