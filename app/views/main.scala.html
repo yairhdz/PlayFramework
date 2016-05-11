@@ -19,6 +19,7 @@
         <link rel="stylesheet" href='@routes.Assets.versioned("bootstrap/css/base.css")'>
         <link rel="stylesheet" href='@routes.Assets.versioned("dataTables/css/dataTables.bootstrap.min.css")'>
         <link rel="stylesheet" href='@routes.Assets.versioned("dataTables/css/jquery.dataTables.min.css")'>
+        <link rel="stylesheet" href='@routes.Assets.versioned("bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css")'>
     </head>
 
     <body>
@@ -27,14 +28,22 @@
 
         <script src='@routes.Assets.versioned("bootstrap/js/jquery-2.2.3.min.js")'></script>
         <script src='@routes.Assets.versioned("bootstrap/js/bootstrap.js")'></script>
-
         <script src='@routes.Assets.versioned("dataTables/js/dataTables.bootstrap.min.js")'></script>
         <script src='@routes.Assets.versioned("dataTables/js/jquery.dataTables.min.js")'></script>
+        <script src='@routes.Assets.versioned("bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js")'></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                $('#table-detail').DataTable();
-            } );
+                $('.table-detail').DataTable();
+
+                $('.datetimepicker').datetimepicker({
+                    format: "dd MM yyyy - HH:ii P",
+                    autoclose: true,
+                    todayBtn: true
+                });
+
+            });
         </script>
+
         <div class="container-fluid">
             @content
         </div>

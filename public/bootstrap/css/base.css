@@ -39,3 +39,12 @@ body {
 .navbar-default  .navbar-brand:hover {
   color: #FFF;
 }
+
+input[readonly] {
+    background-color:rgba(1, 1, 1, 0.0) !important;
+}
+
+
+span.span-width {
+    width: 90px;
+}
