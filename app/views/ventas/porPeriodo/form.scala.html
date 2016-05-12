@@ -6,7 +6,7 @@
                 <div class="form-group">
                     <div class="input-group date datetimepicker col-md-3">
                        <span class="input-group-addon span-width-90">Inicio</span>
-                       <input class="form-control readonly" type="text" name="inicio" readonly>
+                       <input class="form-control" type="text" name="inicio" readonly>
                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                     </div>
                 </div>
@@ -18,7 +18,11 @@
                     </div>
                 </div>
                 <input type="text" name="src" value="ventas_por_periodo" type="text" hidden>
-                <input type="submit" value="Graficar" type="button" formtarget="ventas_por_periodo">
+                <div class="row">
+                    <div class="col-md-1">
+                        <input type="submit" value="Graficar" type="button" formtarget="ventas_por_periodo" class="btn btn-success btn-block">
+                    </div>
+                </div>
             </form>
         </div>
     </div>

@@ -1,10 +1,23 @@
 @navbar()
 @main("Venta - Items / Facturas"){
-    <br/>
-    <form action="@routes.Venta.itemsFacturas">
-        <label>Periodo / Año: </label><input type="text" name="periodo">
-        <input type="text" name="src" value="items_facturas_periodo" hidden>
-        <input type="submit" value="Graficar" formtarget="itemsFacturas">
-        <iframe name="itemsFacturas" frameborder="0" marginheight="20px" width="100%" height="100%"/>
-    </form>
+    <div class="panel panel-success">
+        <div class="panel-body">
+            <form action="@routes.Venta.itemsFacturas">
+                <div class="form-group">
+                    <div class="input-group date yearpicker col-md-2">
+                        <span class="input-group-addon">Periodo / Año</span>
+                        <input type="text" class="form-control" name="periodo" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                </div>
+                <input type="text" name="src" value="items_facturas_periodo" hidden>
+                <div class="row">
+                    <div class="col-md-1">
+                        <input type="submit" value="Graficar" formtarget="itemsFacturas" class="btn btn-success btn-block">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <iframe name="itemsFacturas"/>
 }
