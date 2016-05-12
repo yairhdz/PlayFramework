@@ -305,7 +305,7 @@ import scala.collection.immutable.ListMap
 
       val charter = new Chart()
       val imageData = charter.generateCombinedChart(primaryData, "Items", secondaryData, "Facturas", "Meses", "No. Items", "No. Facturas", s"Ventas totales / No. Facturas - $periodo")
-      Ok(views.html.ventas.itemsFacturas.periodo(imageData, primaryData, periodo))
+      Ok(views.html.ventas.itemsFacturas.periodo(imageData, primaryData, secondaryData, periodo))
     } catch {
       case e: Exception =>
         BadRequest("Couldn’t generate chart. Error: " + e.getMessage)

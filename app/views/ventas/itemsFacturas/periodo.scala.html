@@ -1,13 +1,40 @@
-@(chart: String, primaryData: Map[String, Int], periodo: String)
+@(chart: String, ventaMeses: Map[String, Int], facturasMeses: Map[String, Int], periodo: String)
 @main(""){
-    <img src="data:image/png;base64,@chart">
+    <div class="panel panel-success">
+        <div class="panel-heading">Gráfica</div>
+        <div class="panel-body">
+            <img src="data:image/png;base64,@chart" class="img-responsive">
+        </div>
+    </div>
 
-    <form action="@routes.Venta.itemsFacturasFamilias">
-    @primaryData.map { case(k, v) =>
-            <div><input type="submit" name="mes" value="@k"></div>
-    }
-        <input type="text" name="periodo" value="@periodo" hidden>
-        <input type="text" name="src" value="items_facturas_familias" hidden>
-    </form>
+    <div class="panel panel-success">
+        <div class="panel-heading">Detalle</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <form action="@routes.Venta.itemsFacturasFamilias">
+                        <input type="text" name="periodo" value="@periodo" hidden>
+                        <input type="text" name="src" value="items_facturas_familias" hidden>
+                        <table class="table table-condensed table-bordered table-hover">
+                            <thead>
+                                <th class="success text-center">Mes</th>
+                                <th class="success text-center">Venta</th>
+                                <th class="success text-center">Facturas</th>
+                            </thead>
+                            <tbody>
+                                @for((mes, venta) <- ventaMeses) {
+                                    <tr>
+                                        <td><label hidden>@mes</label><input type="submit" name="mes" value="@mes" class="btn btn-danger btn-block"></td>
+                                        <td><h5 class="text-right">@venta</h5></td>
+                                        <td><h5 class="text-right">@facturasMeses.get(mes)</h5></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
